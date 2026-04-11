@@ -54,3 +54,6 @@ docker compose down
 
 新しい Docker ランチャー用の workflow は `.github/workflows/docker.yml` にあります。
 `master` では `latest`、`develop` では `develop` タグとして GHCR へ publish できます。
+tag push 時は、その tag 名で GHCR イメージを publish し、GitHub Release も自動作成します。
+
+Codex から release まで完結させる場合は、通常どおり commit/push の後に tag を push するだけで十分です。
