@@ -38,10 +38,8 @@ download_latest_jar() {
   fi
 
   if [ ! -f "${JAR_PATH}" ] || [ "${current_tag}" != "${latest_tag}" ]; then
-    tmp_jar="${JAR_PATH}.download"
     echo "Downloading ${asset_name} (${latest_tag})..."
-    curl -fL --retry 3 --retry-delay 2 "${asset_url}" -o "${tmp_jar}"
-    mv "${tmp_jar}" "${JAR_PATH}"
+    curl -fL --retry 3 --retry-delay 2 "${asset_url}" -o "${JAR_PATH}"
     printf '%s' "${latest_tag}" > "${TAG_FILE}"
   else
     echo "Latest jar already cached: ${latest_tag}"

@@ -22,6 +22,14 @@ Linux / ターミナル起動:
 初回起動では `docker-data/config.txt` が生成されます。
 `token` と `owner` を設定してから、もう一度同じスクリプトを実行してください。
 
+`setup.bat` / `setup.command` / `setup.sh` では、次の 2 つを選べます。
+
+- セットアップ / 起動
+- 更新
+
+`更新` を選ぶと、既存コンテナを停止し、`docker-data/runtime/` の jar キャッシュを消してから再作成します。
+そのため、次回起動時に `Cosgy-Dev/JMusicBot-JP` の最新リリース jar を取り直します。
+
 ## 手動起動
 
 ```bash
