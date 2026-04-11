@@ -40,8 +40,39 @@ Javaがインストールされていない場合は、[こちら](https://www.o
 
 # Dockerを使用したセットアップ
 
-Dockerを使用してJavaのインストールなどを行わずにこのボットを自分で起動することができます。
-Dockerを使用する場合は、[こちら](https://hub.docker.com/r/cyberrex/jmusicbot-jp) を参照してください。
+このリポジトリには、ソースコードから直接イメージを作成する `Dockerfile` と `compose.yaml` を含めています。
+Java や ffmpeg をローカルへ入れずに Bot を起動できます。
+
+## ローカルでビルドして起動する
+
+1. このリポジトリを clone します。
+2. `docker compose up` を一度実行します。
+3. 初回起動時に `docker-data/config.txt` が自動生成されるので、`token` と `owner` を編集します。
+4. その後、`docker compose up -d` で起動します。
+
+```bash
+docker compose up
+docker compose up -d
+docker compose logs -f
+```
+
+Bot の設定、プレイリスト、各種保存データは `./docker-data` に保持されます。
+
+## GitHub Container Registry のイメージを使う
+
+GitHub Actions で GHCR へ自動ビルド・配布できるようにしてあります。
+`master` へ push されたイメージは `latest`、`develop` は `develop` タグで公開されます。
+
+```bash
+docker pull ghcr.io/tsukinowarin/jmusicbot-jp-docker:latest
+docker run -d \
+  --name jmusicbot-jp \
+  --restart unless-stopped \
+  -v "$(pwd)/docker-data:/data" \
+  ghcr.io/tsukinowarin/jmusicbot-jp-docker:latest
+```
+
+この場合も、初回起動時に `/data/config.txt` が自動生成されます。生成後に `token` と `owner` を設定して再起動してください。
 
 # Jenkins CI (ci.cosgy.dev)
 
@@ -57,10 +88,11 @@ Jenkins の Pipeline ジョブでこのリポジトリを指定すると、以�
 # GitHub Actions のテストCI
 
 `.github/workflows/maven.yml` で、`develop`/`master` への push・pull request 時に単体テストを実行します。
+また、`.github/workflows/docker.yml` で Docker イメージの build と GHCR 公開を実行します。
 
 ローカルで同等のテストを実行する場合は以下を使用してください。
 
-* `./mvn --batch-mode --update-snapshots test`
+* `./mvnw --batch-mode --update-snapshots test`
 
 # 注意
 

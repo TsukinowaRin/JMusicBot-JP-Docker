@@ -1,6 +1,9 @@
 /nbproject/
 /target/
 /Playlists/
+/Mylists/
+/Publist/
+/docker-data/
 /test/
 *.json
 *.txt
@@ -10,3 +13,4 @@ nb*.xml
 config.txt
 *.jar
 /logs/
+.codex
