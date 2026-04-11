@@ -2,11 +2,12 @@ services:
   jmusicbot:
     build:
       context: .
-    image: jmusicbot-jp:local
+    image: jmusicbot-jp-launcher:local
     container_name: jmusicbot-jp
     restart: unless-stopped
     environment:
-      TZ: Asia/Tokyo
-      JAVA_OPTS: ""
+      TZ: ${TZ:-Asia/Tokyo}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+      JMUSICBOT_RELEASE_REPO: ${JMUSICBOT_RELEASE_REPO:-Cosgy-Dev/JMusicBot-JP}
     volumes:
       - ./docker-data:/data

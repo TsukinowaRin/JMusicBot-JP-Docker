@@ -1,0 +1,114 @@
+<img align="right" src="https://i.imgur.com/zrE80HY.png" height="200" width="200" alt="ロゴ">
+
+[![Downloads](https://img.shields.io/github/downloads/Cosgy-Dev/MusicBot-JP-java/total.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest)
+[![Stars](https://img.shields.io/github/stars/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/stargazers)
+[![Release](https://img.shields.io/github/release/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest)
+[![License](https://img.shields.io/github/license/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/blob/master/LICENSE)
+[![Discord](https://discordapp.com/api/guilds/497317844191805450/widget.png)](https://discord.gg/RBpkHxf)
+![CircleCI](https://img.shields.io/circleci/build/github/Cosgy-Dev/JMusicBot-JP/develop?token=c2ceb77e45cfce45bc8e15161f91d355c54f48b1)
+[![CodeFactor](https://www.codefactor.io/repository/github/cosgy-dev/jmusicbot-jp/badge)](https://www.codefactor.io/repository/github/cosgy-dev/jmusicbot-jp)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/kosugi_kun)
+
+# JMusicBotJP
+
+JMusicBotは、シンプルでかつ操作性の良いUIを使用しています。セットアップも起動も簡単です。
+
+[![Setup](http://i.imgur.com/VvXYp5j.png)](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/)
+
+# このボットの特徴
+
+* セットアップが簡単
+* 曲を高速にロード
+* Discord Botトークンのみでのセットアップ
+* ラグの少ないスムーズな再生
+* DJという独自の権限
+* シンプルで使いやすいUI
+* チャンネルトピックに表示される再生バー
+* ニコニコ動画、YouTubeや、Soundcloudなどを含む多くのサイトをサポート
+* 多数のオンラインラジオ/ストリームをサポート
+* ローカルファイルの再生
+* 再生リストのサポート
+* サーバーや個人の再生リストを作成
+
+# セットアップ
+
+このボットはJava25以上のバージョンが必要です。
+Javaがインストールされていない場合は、[こちら](https://www.oracle.com/jp/java/technologies/downloads/) からダウンロードしてください。
+また、音声抽出・変換のために `ffmpeg` / `ffprobe` を実行環境にインストールしてください（jarへの同梱は行いません）。
+このボットを自分で起動するには [Cosgy Dev 公式ページ](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/) を参照してください
+また、DAVEを使用するため、起動時には `--enable-native-access=ALL-UNNAMED` の付与を推奨します。
+
+# Dockerを使用したセットアップ
+
+このリポジトリには、ソースコードから直接イメージを作成する `Dockerfile` と `compose.yaml` を含めています。
+Java や ffmpeg をローカルへ入れずに Bot を起動できます。
+
+## ローカルでビルドして起動する
+
+1. このリポジトリを clone します。
+2. `docker compose up` を一度実行します。
+3. 初回起動時に `docker-data/config.txt` が自動生成されるので、`token` と `owner` を編集します。
+4. その後、`docker compose up -d` で起動します。
+
+```bash
+docker compose up
+docker compose up -d
+docker compose logs -f
+```
+
+Bot の設定、プレイリスト、各種保存データは `./docker-data` に保持されます。
+
+## GitHub Container Registry のイメージを使う
+
+GitHub Actions で GHCR へ自動ビルド・配布できるようにしてあります。
+`master` へ push されたイメージは `latest`、`develop` は `develop` タグで公開されます。
+
+```bash
+docker pull ghcr.io/tsukinowarin/jmusicbot-jp-docker:latest
+docker run -d \
+  --name jmusicbot-jp \
+  --restart unless-stopped \
+  -v "$(pwd)/docker-data:/data" \
+  ghcr.io/tsukinowarin/jmusicbot-jp-docker:latest
+```
+
+この場合も、初回起動時に `/data/config.txt` が自動生成されます。生成後に `token` と `owner` を設定して再起動してください。
+
+# Jenkins CI (ci.cosgy.dev)
+
+このリポジトリには `Jenkinsfile` が含まれています。  
+Jenkins の Pipeline ジョブでこのリポジトリを指定すると、以下を実行します。
+
+* `mvn --batch-mode --update-snapshots clean verify`
+* `target/*.jar` のアーカイブ公開
+* `PUBLISH_DIR` 環境変数が設定されている場合は、指定ディレクトリへ成果物をコピー
+
+成果物は Jenkins のビルド画面からダウンロードできます。
+
+# GitHub Actions のテストCI
+
+`.github/workflows/maven.yml` で、`develop`/`master` への push・pull request 時に単体テストを実行します。
+また、`.github/workflows/docker.yml` で Docker イメージの build と GHCR 公開を実行します。
+
+ローカルで同等のテストを実行する場合は以下を使用してください。
+
+* `./mvnw --batch-mode --update-snapshots test`
+
+# 注意
+
+このボットは公開ボットとして使用することはできません。
+個人や小規模のサーバーでの使用を推奨します。
+
+# 質問/提案/バグレポート
+
+**機能を提案する前に、推奨/計画された機能リストをお読みください。**<br>
+ボットの機能の変更を提案したり、カスタマイズ・オプションを推奨したり、バグを報告したりしたい場合には、このリポジトリーでIssueを開くか、あるいは [Discordサーバー](https://discord.gg/RBpkHxf)
+に参加してください。(注意:
+追加のAPIキーを必要とする機能リクエストや音楽以外の機能は受け付けません)。
+<br>このボットを気に入っていただけましたらこのリポジトリにStarをしていただけると幸いです。
+また、このボットの開発に必要不可欠な依存ライブラリ[JDA](https://github.com/DV8FromTheWorld/JDA)
+と [lavaplayer](https://github.com/lavalink-devs/lavaplayer)にもStarをしていただけると幸いです。
+
+# コマンドの例
+
+![Example](https://i.imgur.com/tevrtKt.png)

@@ -1,0 +1,13 @@
+.git
+.github
+.circleci
+.idea
+target
+docker-data
+logs
+Playlists
+Mylists
+Publist
+*.iml
+*.jar
+.codex
