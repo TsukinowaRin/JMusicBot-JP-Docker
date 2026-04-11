@@ -56,4 +56,5 @@ docker compose down
 `master` では `latest`、`develop` では `develop` タグとして GHCR へ publish できます。
 tag push 時は、その tag 名で GHCR イメージを publish し、GitHub Release も自動作成します。
 
-Codex から release まで完結させる場合は、通常どおり commit/push の後に tag を push するだけで十分です。
+Codex から release まで完結させる場合は、`./scripts/release.sh` を使うと本家 `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、その番号でこのリポジトリの branch push と tag push を行います。
+これで、このリポジトリの version 番号は本家 release に揃います。
