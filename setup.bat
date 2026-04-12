@@ -6,7 +6,7 @@ set "ACTION=%~1"
 
 where docker >nul 2>nul
 if errorlevel 1 (
-  echo Docker が見つかりません。Docker Desktop もしくは Docker Engine をインストールしてください。
+  echo Docker was not found. Install Docker Desktop or Docker Engine first.
   pause
   exit /b 1
 )
@@ -14,10 +14,10 @@ if errorlevel 1 (
 if not exist docker-data mkdir docker-data
 
 if "%ACTION%"=="" (
-  echo 操作を選択してください。
-  echo 1^) セットアップ / 起動
-  echo 2^) 更新
-  choice /C 12 /N /M "選択 [1/2]: "
+  echo Select an action.
+  echo 1^) Setup / Start
+  echo 2^) Update
+  choice /C 12 /N /M "Choice [1/2]: "
   if errorlevel 2 (
     set "ACTION=update"
   ) else (
@@ -45,18 +45,15 @@ if /I "%ACTION%"=="setup" (
 )
 
 if errorlevel 1 (
-  echo Docker 起動に失敗しました。
+  echo Docker startup failed.
   pause
   exit /b 1
 )
 
 if exist docker-data\config.txt (
-  findstr /C:"Botトークンをここに貼り付け" docker-data\config.txt >nul
-  if not errorlevel 1 (
-    echo.
-    echo docker-data\config.txt が生成されました。token と owner を設定してください。
-    start "" notepad docker-data\config.txt
-  )
+  echo.
+  echo Config file: docker-data\config.txt
+  echo If this is your first start, edit token and owner, then run again.
 )
 
 echo.
