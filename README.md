@@ -19,6 +19,11 @@ macOS:
 Linux / ターミナル起動:
 - `./setup.sh`
 
+Release から落として使う場合:
+- Windows: `Install.bat`
+- macOS: `Install.command`
+- Linux: `Install.sh`
+
 初回起動では `docker-data/config.txt` が生成されます。
 `token` と `owner` を設定してから、もう一度同じスクリプトを実行してください。
 
@@ -55,6 +60,7 @@ docker compose down
 新しい Docker ランチャー用の workflow は `.github/workflows/docker.yml` にあります。
 `master` では `latest`、`develop` では `develop` タグとして GHCR へ publish できます。
 tag push 時は、その tag 名で GHCR イメージを publish し、GitHub Release も自動作成します。
+Release asset には `Install.bat` / `Install.command` / `Install.sh` と zip bundle も添付されます。
 
 Codex から release まで完結させる場合は、`./scripts/release.sh` を使うと本家 `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、その番号でこのリポジトリの branch push と tag push を行います。
 これで、このリポジトリの version 番号は本家 release に揃います。

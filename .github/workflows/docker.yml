@@ -75,13 +75,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create GitHub Release
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare release assets
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -eu
+          bundle_dir="release-assets/JMusicBot-JP-Docker-${TAG_NAME}"
+          mkdir -p "${bundle_dir}/scripts"
+          cp README.md Dockerfile compose.yaml config.template.txt "${bundle_dir}/"
+          cp setup.bat setup.command setup.sh Install.bat Install.command Install.sh "${bundle_dir}/"
+          cp scripts/entrypoint.sh "${bundle_dir}/scripts/"
+          chmod +x Install.command Install.sh setup.command setup.sh scripts/entrypoint.sh
+          chmod +x "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh" "${bundle_dir}/setup.command" "${bundle_dir}/setup.sh" "${bundle_dir}/scripts/entrypoint.sh"
+          cd release-assets
+          zip -r "../JMusicBot-JP-Docker-${TAG_NAME}.zip" "JMusicBot-JP-Docker-${TAG_NAME}"
+
+      - name: Create or update GitHub Release
         uses: actions/github-script@v7
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}
           TAG_NAME: ${{ github.ref_name }}
         with:
           script: |
+            const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const tag = process.env.TAG_NAME;
@@ -100,15 +119,23 @@ jobs:
               '### Notes',
               '',
               '- This image downloads the latest `Cosgy-Dev/JMusicBot-JP` release jar at container startup.',
-              '- Use the setup/update scripts in this repository for local Docker-based operation.'
+              '- Release assets include `Install.bat`, `Install.command`, `Install.sh`, and a zip bundle for local Docker-based setup.'
             ].join('\n');
+            const assets = [
+              { name: `JMusicBot-JP-Docker-${tag}.zip`, path: `JMusicBot-JP-Docker-${tag}.zip`, contentType: 'application/zip' },
+              { name: 'Install.bat', path: 'Install.bat', contentType: 'application/octet-stream' },
+              { name: 'Install.command', path: 'Install.command', contentType: 'application/octet-stream' },
+              { name: 'Install.sh', path: 'Install.sh', contentType: 'application/octet-stream' }
+            ];
+            let releaseId;
 
             try {
               const existing = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+              releaseId = existing.data.id;
               await github.rest.repos.updateRelease({
                 owner,
                 repo,
-                release_id: existing.data.id,
+                release_id: releaseId,
                 name: tag,
                 body,
                 draft: false,
@@ -116,7 +143,7 @@ jobs:
               });
             } catch (error) {
               if (error.status !== 404) throw error;
-              await github.rest.repos.createRelease({
+              const created = await github.rest.repos.createRelease({
                 owner,
                 repo,
                 tag_name: tag,
@@ -125,5 +152,35 @@ jobs:
                 generate_release_notes: true,
                 draft: false,
                 prerelease: /(?:alpha|beta|rc|pre)/i.test(tag)
+              });
+              releaseId = created.data.id;
+            }
+
+            const release = await github.rest.repos.getRelease({
+              owner,
+              repo,
+              release_id: releaseId
+            });
+
+            for (const asset of release.data.assets) {
+              if (!assets.some((candidate) => candidate.name === asset.name)) continue;
+              await github.rest.repos.deleteReleaseAsset({
+                owner,
+                repo,
+                asset_id: asset.id
+              });
+            }
+
+            for (const asset of assets) {
+              await github.rest.repos.uploadReleaseAsset({
+                owner,
+                repo,
+                release_id: releaseId,
+                name: asset.name,
+                headers: {
+                  'content-type': asset.contentType,
+                  'content-length': fs.statSync(asset.path).size
+                },
+                data: fs.readFileSync(asset.path)
               });
             }
