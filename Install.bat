@@ -91,14 +91,12 @@ if exist "%TARGET_DIR%\compose.yaml" (
 echo Local launcher files were not found.
 echo Downloading JMusicBot-JP-Docker-%RELEASE_TAG%.zip ...
 
-where powershell >nul 2>nul
-if errorlevel 1 (
-  echo Windows PowerShell was not found.
-  pause
-  exit /b 1
-)
+set "POWERSHELL_EXE="
+if exist "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" set "POWERSHELL_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+if "%POWERSHELL_EXE%"=="" if exist "%ProgramFiles%\PowerShell\7\pwsh.exe" set "POWERSHELL_EXE=%ProgramFiles%\PowerShell\7\pwsh.exe"
+if "%POWERSHELL_EXE%"=="" set "POWERSHELL_EXE=powershell"
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"%POWERSHELL_EXE%" -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference = 'Stop';" ^
   "$ProgressPreference = 'SilentlyContinue';" ^
   "$downloadUrl = $env:DOWNLOAD_URL;" ^
