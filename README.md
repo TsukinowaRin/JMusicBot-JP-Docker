@@ -62,5 +62,5 @@ docker compose down
 tag push 時は、その tag 名で GHCR イメージを publish し、GitHub Release も自動作成します。
 Release asset には `Install.bat` / `Install.command` / `Install.sh` と zip bundle も添付されます。
 
-Codex から release まで完結させる場合は、`./scripts/release.sh` を使うと本家 `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、その番号でこのリポジトリの branch push と tag push を行います。
-これで、このリポジトリの version 番号は本家 release に揃います。
+Codex から release まで完結させる場合は、`./scripts/release.sh` を使うと本家 `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、このリポジトリではその末尾に patch 番号を付けて tag push します。
+たとえば本家が `0.11.0` の場合、このリポジトリは `0.11.0.1`、次回は `0.11.0.2` のように増やします。

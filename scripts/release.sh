@@ -38,18 +38,47 @@ fi
 
 echo "Upstream latest tag: ${tag}"
 
-if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null 2>&1; then
-  tagged_commit="$(git rev-list -n 1 "${tag}")"
+git fetch --tags origin >/dev/null 2>&1 || true
+
+latest_local_tag="$(
+  git tag -l "${tag}.*" \
+    | awk -F. -v base="${tag}" '
+        index($0, base ".") == 1 && $NF ~ /^[0-9]+$/ {
+          suffix = $NF + 0
+          if (suffix > max) {
+            max = suffix
+          }
+        }
+        END {
+          if (max > 0) {
+            print max
+          }
+        }
+      '
+)"
+
+if [ -n "${latest_local_tag}" ]; then
+  next_suffix=$((latest_local_tag + 1))
+else
+  next_suffix=1
+fi
+
+release_tag="${tag}.${next_suffix}"
+
+echo "Release tag for this repository: ${release_tag}"
+
+if git rev-parse -q --verify "refs/tags/${release_tag}" >/dev/null 2>&1; then
+  tagged_commit="$(git rev-list -n 1 "${release_tag}")"
   head_commit="$(git rev-parse HEAD)"
   if [ "${tagged_commit}" != "${head_commit}" ]; then
-    echo "tag ${tag} は既に別 commit を指しています。" >&2
+    echo "tag ${release_tag} は既に別 commit を指しています。" >&2
     exit 1
   fi
 else
-  git tag -a "${tag}" -m "Release ${tag}"
+  git tag -a "${release_tag}" -m "Release ${release_tag}"
 fi
 
 git push -u origin "${branch}"
-git push origin "${tag}"
+git push origin "${release_tag}"
 
-echo "Pushed branch ${branch} and tag ${tag}."
+echo "Pushed branch ${branch} and tag ${release_tag}."
