@@ -2,6 +2,14 @@
 setlocal
 cd /d "%~dp0"
 
+set "SCRIPT_DIR=%~dp0"
+set "RELEASE_TAG=__RELEASE_TAG__"
+if "%RELEASE_TAG:~0,2%"=="__" set "RELEASE_TAG="
+set "RELEASE_REPO=TsukinowaRin/JMusicBot-JP-Docker"
+if not "%JMUSICBOT_LAUNCHER_REPO%"=="" set "RELEASE_REPO=%JMUSICBOT_LAUNCHER_REPO%"
+set "DOWNLOAD_URL=https://github.com/%RELEASE_REPO%/releases/download/%RELEASE_TAG%/JMusicBot-JP-Docker-%RELEASE_TAG%.zip"
+set "TARGET_DIR=%SCRIPT_DIR%JMusicBot-JP-Docker-%RELEASE_TAG%"
+
 set "ACTION=%~1"
 
 where docker >nul 2>nul
@@ -9,6 +17,11 @@ if errorlevel 1 (
   echo Docker was not found. Install Docker Desktop or Docker Engine first.
   pause
   exit /b 1
+)
+
+if not exist compose.yaml (
+  call :bootstrap
+  exit /b %ERRORLEVEL%
 )
 
 if not exist docker-data mkdir docker-data
@@ -59,3 +72,53 @@ if exist docker-data\config.txt (
 echo.
 docker compose logs --tail 50
 pause
+exit /b 0
+
+:bootstrap
+if "%RELEASE_TAG%"=="" (
+  echo This installer does not have a release tag.
+  echo Download Install.bat from a GitHub release page, or use the zip bundle.
+  pause
+  exit /b 1
+)
+
+if exist "%TARGET_DIR%\compose.yaml" (
+  cd /d "%TARGET_DIR%"
+  call Install.bat %ACTION%
+  exit /b %ERRORLEVEL%
+)
+
+echo Local launcher files were not found.
+echo Downloading JMusicBot-JP-Docker-%RELEASE_TAG%.zip ...
+
+where powershell >nul 2>nul
+if errorlevel 1 (
+  echo Windows PowerShell was not found.
+  pause
+  exit /b 1
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference = 'Stop';" ^
+  "$ProgressPreference = 'SilentlyContinue';" ^
+  "$downloadUrl = $env:DOWNLOAD_URL;" ^
+  "$scriptDir = [System.IO.Path]::GetFullPath($env:SCRIPT_DIR);" ^
+  "$zipPath = Join-Path $env:TEMP ('JMusicBot-JP-Docker-' + $env:RELEASE_TAG + '.zip');" ^
+  "Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath;" ^
+  "Expand-Archive -Path $zipPath -DestinationPath $scriptDir -Force;"
+
+if errorlevel 1 (
+  echo Failed to download or extract the launcher bundle.
+  pause
+  exit /b 1
+)
+
+if not exist "%TARGET_DIR%\compose.yaml" (
+  echo Extracted bundle was not found: %TARGET_DIR%
+  pause
+  exit /b 1
+)
+
+cd /d "%TARGET_DIR%"
+call Install.bat %ACTION%
+exit /b %ERRORLEVEL%

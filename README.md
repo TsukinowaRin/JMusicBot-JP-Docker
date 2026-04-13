@@ -20,7 +20,7 @@ Linux / ターミナル起動:
 - `./setup.sh`
 
 Release から落として使う場合:
-- Windows: `Install.bat`
+- Windows: `Install.bat` 単体でも可。必要なファイルが無ければ同じ release の zip を自動取得
 - macOS: `Install.command`
 - Linux: `Install.sh`
 

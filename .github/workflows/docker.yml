@@ -88,6 +88,7 @@ jobs:
           cp README.md Dockerfile compose.yaml config.template.txt "${bundle_dir}/"
           cp setup.bat setup.command setup.sh Install.bat Install.command Install.sh "${bundle_dir}/"
           cp scripts/entrypoint.sh "${bundle_dir}/scripts/"
+          sed -i "s/__RELEASE_TAG__/${TAG_NAME}/g" Install.bat "${bundle_dir}/Install.bat"
           chmod +x Install.command Install.sh setup.command setup.sh scripts/entrypoint.sh
           chmod +x "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh" "${bundle_dir}/setup.command" "${bundle_dir}/setup.sh" "${bundle_dir}/scripts/entrypoint.sh"
           cd release-assets
