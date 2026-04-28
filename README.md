@@ -266,6 +266,12 @@ Docker launcher 用 workflow は `.github/workflows/docker.yml` にあります�
 - `develop`: `develop` tag として GHCR へ publish
 - git tag: tag 名と `latest` として GHCR へ publish し、GitHub Release を作成または更新
 
+Release assets には、zip bundle に加えて次の単体インストーラを添付します。
+
+- `Install-JMusicBot-Docker-Windows.bat`
+- `Install-JMusicBot-Docker-macOS.command`
+- `Install-JMusicBot-Docker-Linux.sh`
+
 Release まで進める場合は、作業ツリーを clean にしてから `./scripts/release.sh` を使います。この script は upstream `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、この repo の release tag として push します。upstream tag が既にこの repo に存在する場合は、`0.11.0.5` のように末尾へ launcher patch 番号を付けます。
 
 ## 注意

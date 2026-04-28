@@ -5,9 +5,9 @@
 ## 現在の状態
 
 - 現在の作業:
-  - update / uninstall script の追加。
+  - GitHub Release 単体 asset 名の OS 別リネーム。
 - 直近の状態:
-  - `update.bat` / `update.sh` と `uninstall.bat` / `uninstall.sh` を追加した。setup menu に uninstall を追加した。update は `docker-data/config.txt` を保持し、uninstall は container を消して `docker-data/` は既定で残す。構文チェックは完了。
+  - Release workflow の単体 asset 名を `Install-JMusicBot-Docker-Windows.bat` / `Install-JMusicBot-Docker-macOS.command` / `Install-JMusicBot-Docker-Linux.sh` へ変更した。zip 内の `Install.*` は既存互換のため維持。構文チェックは完了。
 - 次にやること:
   - 次のユーザー依頼を `docs/REQS.md` に反映してから作業する。
 - ブロッカー:
@@ -20,6 +20,37 @@
 ---
 
 ## エントリ
+
+### 2026-04-28 15:19 JST
+
+- 目的:
+  - GitHub Release の zip 外単体 installer assets を、OS が分かる名前へ変更する。
+- 変更:
+  - `.github/workflows/docker.yml` の release asset 生成で、`Install.bat` / `Install.command` / `Install.sh` から OS 別の単体 asset をコピー生成するよう変更。
+  - upload asset 名を `Install-JMusicBot-Docker-Windows.bat`、`Install-JMusicBot-Docker-macOS.command`、`Install-JMusicBot-Docker-Linux.sh` に変更。
+  - 既存 release を更新した場合に旧名 `Install.bat` / `Install.command` / `Install.sh` が残らないよう削除対象へ追加。
+  - `README.md` に新しい release asset 名を追記。
+  - `docs/REQS.md` を今回依頼で更新。
+- コマンドと結果:
+  - `sh -n setup.sh setup.command update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`: 成功。
+  - `docker compose config`: 成功。
+  - `sed ... .github/workflows/docker.yml | node --input-type=module --check`: 成功。
+  - `git diff --check`: 成功。
+- 判断 / 仮定:
+  - zip bundle 内は既存導線維持のため `Install.*` のまま残す。
+- 未完了:
+  - commit、push、release。
+- 次:
+  - workflow script の構文チェック後、commit して次の tag を release する。
+- 次に最初に読む文書:
+  - `docs/REQS.md`
+- 次に最初に実行するコマンド:
+  - `git diff -- .github/workflows/docker.yml README.md docs/REQS.md docs/WORKLOG.md`
+- ブロッカー:
+  - なし。
+- 参照すべきファイル:
+  - `.github/workflows/docker.yml`
+  - `README.md`
 
 ### 2026-04-28 13:46 JST
 

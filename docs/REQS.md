@@ -5,18 +5,17 @@
 ## 依頼内容
 
 - 依頼:
-  - 古い Docker container を uninstall する script を作る。
-  - config を引き継いで update する script を作る。
-  - Docker では不要なら作らなくてよいが、必要性を判断して進める。
+  - GitHub Release の単体 asset 名を `Install.bat` ではなく、OS が分かる名前へ変更する。
+  - zip の中のファイル名は対象外。
 - 背景:
-  - Docker では `docker-data/` を消さなければ config は引き継げる。
-  - uninstall は container を消す用途として有用。設定データ削除は危険なので確認付きにする。
+  - 現在の release assets は `Install.bat` / `Install.command` / `Install.sh` で、OS が一覧上で分かりづらい。
+  - zip bundle の中では既存互換の `Install.*` を残してよい。
 
 ## 目標
 
-1. Windows / Linux 用の update script を追加し、`docker-data/config.txt` を保持して更新する。
-2. Windows / Linux 用の uninstall script を追加し、container を削除する。
-3. setup menu と README に update / uninstall の扱いを明記する。
+1. workflow の release upload asset 名を OS 別に分かる名前へ変更する。
+2. 既存 release を再実行した場合に旧 asset 名が残らないようにする。
+3. README に新しい asset 名を書く。
 
 ## 非目標
 
@@ -33,19 +32,17 @@
 
 ## 受け入れ条件
 
-- [x] `update.bat` / `update.sh` を追加する。
-- [x] update は `docker-data/config.txt` を残し、`docker-data/runtime` の jar cache だけ削除する。
-- [x] `uninstall.bat` / `uninstall.sh` を追加する。
-- [x] uninstall は container を削除し、`docker-data/` は既定で残す。
-- [x] `setup.bat` / `setup.sh` のメニューに uninstall を追加する。
-- [x] README に update / uninstall の扱いを書く。
+- [x] Windows asset を `Install-JMusicBot-Docker-Windows.bat` にする。
+- [x] macOS asset を `Install-JMusicBot-Docker-macOS.command` にする。
+- [x] Linux asset を `Install-JMusicBot-Docker-Linux.sh` にする。
+- [x] 旧 asset 名 `Install.bat` / `Install.command` / `Install.sh` を release 更新時に削除対象へ入れる。
 - [x] 変更範囲に近い構文チェックを通す。
 
 ## 未解決事項
 
-- Windows 実機で `.bat` 実行までは未検証。構文とロジックは静的に確認する。
+- なし。
 
 ## 仮定
 
-- 今回の依頼は setup script と docs の small task と分類する。
-- config 引き継ぎに特別な移行処理は不要。`docker-data/` を残すことが重要。
+- 今回の依頼は release workflow と docs の small task と分類する。
+- zip bundle 内の `Install.*` は既存導線維持のため名前を変えない。

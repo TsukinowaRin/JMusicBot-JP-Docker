@@ -89,7 +89,11 @@ jobs:
           cp setup.bat setup.command setup.sh update.bat update.sh uninstall.bat uninstall.sh Install.bat Install.command Install.sh "${bundle_dir}/"
           cp scripts/entrypoint.sh "${bundle_dir}/scripts/"
           sed -i "s/__RELEASE_TAG__/${TAG_NAME}/g" Install.bat "${bundle_dir}/Install.bat"
+          cp Install.bat Install-JMusicBot-Docker-Windows.bat
+          cp Install.command Install-JMusicBot-Docker-macOS.command
+          cp Install.sh Install-JMusicBot-Docker-Linux.sh
           chmod +x Install.command Install.sh setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh
+          chmod +x Install-JMusicBot-Docker-macOS.command Install-JMusicBot-Docker-Linux.sh
           chmod +x "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh" "${bundle_dir}/setup.command" "${bundle_dir}/setup.sh" "${bundle_dir}/update.sh" "${bundle_dir}/uninstall.sh" "${bundle_dir}/scripts/entrypoint.sh"
           cd release-assets
           zip -r "../JMusicBot-JP-Docker-${TAG_NAME}.zip" "JMusicBot-JP-Docker-${TAG_NAME}"
@@ -179,7 +183,7 @@ jobs:
               '',
               '### Notes',
               '',
-              '- Release assets include `Install.bat`, `Install.command`, `Install.sh`, and a zip bundle for local Docker-based setup.',
+              '- Release assets include `Install-JMusicBot-Docker-Windows.bat`, `Install-JMusicBot-Docker-macOS.command`, `Install-JMusicBot-Docker-Linux.sh`, and a zip bundle for local Docker-based setup.',
               '- If you use this repository locally, `setup.bat` works on Windows and `./setup.sh` works on Linux / WSL.',
               '- `config.template.txt` is only the template. Edit the generated `docker-data/config.txt` for actual bot settings.',
               '- To refresh the upstream jar while keeping config, use `update.bat` or `./update.sh`.',
@@ -187,10 +191,11 @@ jobs:
             ].join('\n');
             const assets = [
               { name: `JMusicBot-JP-Docker-${tag}.zip`, path: `JMusicBot-JP-Docker-${tag}.zip`, contentType: 'application/zip' },
-              { name: 'Install.bat', path: 'Install.bat', contentType: 'application/octet-stream' },
-              { name: 'Install.command', path: 'Install.command', contentType: 'application/octet-stream' },
-              { name: 'Install.sh', path: 'Install.sh', contentType: 'application/octet-stream' }
+              { name: 'Install-JMusicBot-Docker-Windows.bat', path: 'Install-JMusicBot-Docker-Windows.bat', contentType: 'application/octet-stream' },
+              { name: 'Install-JMusicBot-Docker-macOS.command', path: 'Install-JMusicBot-Docker-macOS.command', contentType: 'application/octet-stream' },
+              { name: 'Install-JMusicBot-Docker-Linux.sh', path: 'Install-JMusicBot-Docker-Linux.sh', contentType: 'application/octet-stream' }
             ];
+            const obsoleteAssetNames = new Set(['Install.bat', 'Install.command', 'Install.sh']);
             let releaseId;
 
             try {
@@ -227,7 +232,7 @@ jobs:
             });
 
             for (const asset of release.data.assets) {
-              if (!assets.some((candidate) => candidate.name === asset.name)) continue;
+              if (!obsoleteAssetNames.has(asset.name) && !assets.some((candidate) => candidate.name === asset.name)) continue;
               await github.rest.repos.deleteReleaseAsset({
                 owner,
                 repo,
