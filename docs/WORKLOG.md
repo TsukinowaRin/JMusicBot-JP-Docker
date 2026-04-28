@@ -7,9 +7,9 @@
 - 現在の作業:
   - Windows installer の進捗表示改善と `setup.bat` メニュー表示バグ修正。
 - 直近の状態:
-  - `Install.bat` に step 表示と必要ファイル検証を追加。`setup.bat` のメニューを `[1]` 形式に変更し、Windows `cmd.exe` smoke も通した。
+  - `Install.bat` に step 表示と必要ファイル検証を追加。`setup.bat` のメニューを `[1]` 形式に変更し、Windows `cmd.exe` smoke も通した。`0.11.0.9` release 済み。
 - 次にやること:
-  - commit / push / release する。
+  - 次のユーザー依頼を `docs/REQS.md` に反映してから作業する。
 - ブロッカー:
   - なし。
 - 次に最初に読む文書:
@@ -38,12 +38,19 @@
   - `git diff --check`: 成功。`Install.bat` / `setup.bat` は `.gitattributes` により commit 時に CRLF へ正規化される警告のみ。
   - Windows `cmd.exe` menu smoke: CRLF 正規化した一時コピーで `setup.bat` を実行し、`[1]` から `[5]` のメニューが command 誤実行なしで表示されることを確認。
   - Windows `Install.bat` smoke: tag `0.11.0.8` を埋め込んだ一時 installer を `cmd.exe` から実行し、`[1/5]` から `[5/5]` の進捗、download、copy、必要ファイル検証、`setup.bat` 到達を確認。`__probe__` action のため最終 exit は 1 だが install 自体は成功。
+  - `git push origin develop`: 成功。
+  - `sh scripts/release.sh`: `0.11.0.9` tag push 成功。
+  - `gh run watch 25045440406 --exit-status`: 成功。Docker image build / release asset 作成ともに成功。Node.js 20 deprecation warning のみ。
+  - `gh release view 0.11.0.9 --json ...`: assets 4 件を確認。
+  - Release asset smoke: `Install-JMusicBot-Docker-Windows.bat` と zip 内 `setup.bat` に非 ASCII が残っていないこと、step 表示と `[1] Setup / Start` が含まれることを確認。
+  - Release Windows installer smoke: `0.11.0.9` の `Install-JMusicBot-Docker-Windows.bat` を `JMUSICBOT_INSTALL_DIR` 指定で `cmd.exe` 実行し、指定先に `setup.bat` / `compose.yaml` / `config.template.txt` が入ること、`[1/5]` から `[5/5]` まで表示されることを確認。
+  - Release setup menu smoke: `0.11.0.9` zip 内 `setup.bat` を `cmd.exe` 実行し、`Select an action` と `[1]` から `[5]` が表示され、`not recognized as an internal or external command` が出ないことを確認。
 - 判断 / 仮定:
   - `セットアップ` が command として扱われた原因は、メニュー表示行の `)` と parenthesized block の組み合わせ。`[1]` 形式と block 外表示で回避する。
 - 未完了:
-  - commit、push、release。
+  - なし。
 - 次:
-  - Windows path 上に一時コピーして `.bat` 単体 install smoke を行う。
+  - 次の具体依頼が来たら `docs/REQS.md` を更新してから進める。
 - 次に最初に読む文書:
   - `docs/REQS.md`
 - 次に最初に実行するコマンド:

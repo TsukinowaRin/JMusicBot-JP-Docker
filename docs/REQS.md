@@ -40,7 +40,7 @@
 - [x] `setup.bat` のメニューが `[1]` 形式で正しく表示される。
 - [x] Windows 側 `cmd.exe` で `.bat` 単体 install smoke を通す。
 - [x] 変更範囲に近い構文チェックを通す。
-- [ ] commit / push / release を完了する。
+- [x] commit / push / release を完了する。
 
 ## 未解決事項
 
