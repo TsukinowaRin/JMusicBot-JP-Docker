@@ -88,7 +88,7 @@ jobs:
           cp README.md Dockerfile compose.yaml config.template.txt "${bundle_dir}/"
           cp setup.bat setup.command setup.sh update.bat update.sh uninstall.bat uninstall.sh Install.bat Install.command Install.sh "${bundle_dir}/"
           cp scripts/entrypoint.sh "${bundle_dir}/scripts/"
-          sed -i "s/__RELEASE_TAG__/${TAG_NAME}/g" Install.bat "${bundle_dir}/Install.bat"
+          sed -i "s/__RELEASE_TAG__/${TAG_NAME}/g" Install.bat Install.command Install.sh "${bundle_dir}/Install.bat" "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh"
           cp Install.bat Install-JMusicBot-Docker-Windows.bat
           cp Install.command Install-JMusicBot-Docker-macOS.command
           cp Install.sh Install-JMusicBot-Docker-Linux.sh
@@ -184,6 +184,9 @@ jobs:
               '### Notes',
               '',
               '- Release assets include `Install-JMusicBot-Docker-Windows.bat`, `Install-JMusicBot-Docker-macOS.command`, `Install-JMusicBot-Docker-Linux.sh`, and a zip bundle for local Docker-based setup.',
+              '- The single-file installer downloads the zip bundle into a temporary location, then extracts it next to the installer as `JMusicBot-JP-Docker-' + tag + '/`.',
+              '- Keep the extracted `JMusicBot-JP-Docker-' + tag + '/docker-data/` directory. It contains `config.txt`, playlists, and the downloaded upstream jar cache mounted into the container.',
+              '- After setup, you may delete the original single-file installer and any manually downloaded zip. Do not delete the extracted launcher folder if you want to use the included update / uninstall scripts.',
               '- If you use this repository locally, `setup.bat` works on Windows and `./setup.sh` works on Linux / WSL.',
               '- `config.template.txt` is only the template. Edit the generated `docker-data/config.txt` for actual bot settings.',
               '- To refresh the upstream jar while keeping config, use `update.bat` or `./update.sh`.',

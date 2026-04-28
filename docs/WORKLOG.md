@@ -5,11 +5,11 @@
 ## 現在の状態
 
 - 現在の作業:
-  - GitHub Release 単体 asset 名の OS 別リネーム。
+  - Release 単体 installer の bootstrap 修正と展開先 / 削除可否の明文化。
 - 直近の状態:
-  - Release workflow の単体 asset 名を `Install-JMusicBot-Docker-Windows.bat` / `Install-JMusicBot-Docker-macOS.command` / `Install-JMusicBot-Docker-Linux.sh` へ変更した。zip 内の `Install.*` は既存互換のため維持。構文チェックは完了。
+  - Windows / macOS / Linux 単体 installer の bootstrap 修正と docs 更新が完了。構文チェックと release asset 生成の主要確認も完了。
 - 次にやること:
-  - 次のユーザー依頼を `docs/REQS.md` に反映してから作業する。
+  - commit / push / release する。
 - ブロッカー:
   - なし。
 - 次に最初に読む文書:
@@ -20,6 +20,43 @@
 ---
 
 ## エントリ
+
+### 2026-04-28 16:05 JST
+
+- 目的:
+  - Release assets の単体 installer が動かない問題を修正し、展開先と削除可否を説明する。
+- 変更:
+  - `docs/REQS.md` を今回依頼で更新。
+  - `Install.bat` を、展開済み環境では `setup.bat` に委譲し、未展開なら `JMusicBot-JP-Docker-<tag>.zip` を同じフォルダへ `JMusicBot-JP-Docker-<tag>/` として展開する形へ変更。
+  - `Install.sh` / `Install.command` に同等の zip download / extract bootstrap を追加。
+  - `setup.command` が引数を `setup.sh` へ渡すよう修正。
+  - `.github/workflows/docker.yml` で shell installer にも release tag を埋め込むよう変更。
+  - `README.md` に単体 installer の展開先、`docker-data/` の扱い、削除してよいファイルを追記。
+- コマンドと結果:
+  - `sh -n Install.sh Install.command setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`: 成功。
+  - `docker compose config`: 成功。
+  - `.github/workflows/docker.yml` の `github-script` 部分を `node --input-type=module --check` で確認: 成功。
+  - `git diff --check`: 成功。`Install.bat` は `.gitattributes` により commit 時に CRLF へ正規化される警告のみ。
+  - shell installer の既存展開先検出 smoke: `Install.sh` は `setup.sh update`、`Install.command` は `setup.command config` へ引数付きで委譲できることを確認。
+  - release asset 生成の主要手順 smoke: OS 別単体 installer 生成、release tag 埋め込み、bundle 内 `setup.*` 配置を確認。ローカル環境に `zip` / `unzip` が無いため、zip 作成そのものは未検証。
+- 判断 / 仮定:
+  - 単体 installer は installer を置いたフォルダ直下へ bundle を展開する。Docker 起動後も `docker-data/` は host bind mount なので残す。
+- 未完了:
+  - commit、push、release。
+- 次:
+  - 変更範囲の shell / workflow / release asset 生成チェックを行う。
+- 次に最初に読む文書:
+  - `docs/REQS.md`
+- 次に最初に実行するコマンド:
+  - `sh -n Install.sh Install.command setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`
+- ブロッカー:
+  - なし。
+- 参照すべきファイル:
+  - `Install.bat`
+  - `Install.command`
+  - `Install.sh`
+  - `.github/workflows/docker.yml`
+  - `README.md`
 
 ### 2026-04-28 15:19 JST
 

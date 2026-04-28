@@ -1,5 +1,6 @@
 @echo off
 setlocal
+chcp 65001 >nul
 cd /d "%~dp0"
 
 set "SCRIPT_DIR=%~dp0"
@@ -10,8 +11,6 @@ if not "%JMUSICBOT_LAUNCHER_REPO%"=="" set "RELEASE_REPO=%JMUSICBOT_LAUNCHER_REP
 set "DOWNLOAD_URL=https://github.com/%RELEASE_REPO%/releases/download/%RELEASE_TAG%/JMusicBot-JP-Docker-%RELEASE_TAG%.zip"
 set "TARGET_DIR=%SCRIPT_DIR%JMusicBot-JP-Docker-%RELEASE_TAG%"
 
-set "ACTION=%~1"
-
 where docker >nul 2>nul
 if errorlevel 1 (
   echo Docker was not found. Install Docker Desktop or Docker Engine first.
@@ -19,77 +18,27 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist compose.yaml (
-  call :bootstrap
+if exist setup.bat (
+  call setup.bat %*
   exit /b %ERRORLEVEL%
 )
 
-if not exist docker-data mkdir docker-data
-
-if "%ACTION%"=="" (
-  echo Select an action.
-  echo 1^) Setup / Start
-  echo 2^) Update
-  choice /C 12 /N /M "Choice [1/2]: "
-  if errorlevel 2 (
-    set "ACTION=update"
-  ) else (
-    set "ACTION=setup"
-  )
-  echo.
-)
-
-if /I "%ACTION%"=="1" set "ACTION=setup"
-if /I "%ACTION%"=="2" set "ACTION=update"
-
-if /I "%ACTION%"=="setup" (
-  echo Building and starting JMusicBot-JP launcher...
-  docker compose up -d --build
-) else if /I "%ACTION%"=="update" (
-  echo Updating JMusicBot-JP launcher...
-  docker compose down
-  if exist docker-data\runtime rmdir /S /Q docker-data\runtime
-  docker compose up -d --build --force-recreate
-) else (
-  echo Unknown action: %ACTION%
-  echo Usage: Install.bat [setup^|update]
-  pause
-  exit /b 1
-)
-
-if errorlevel 1 (
-  echo Docker startup failed.
-  pause
-  exit /b 1
-)
-
-if exist docker-data\config.txt (
-  echo.
-  echo Config file: docker-data\config.txt
-  echo If this is your first start, edit token and owner, then run again.
-)
-
-echo.
-docker compose logs --tail 50
-pause
-exit /b 0
-
-:bootstrap
 if "%RELEASE_TAG%"=="" (
   echo This installer does not have a release tag.
-  echo Download Install.bat from a GitHub release page, or use the zip bundle.
+  echo Download Install-JMusicBot-Docker-Windows.bat from a GitHub release page, or use the zip bundle.
   pause
   exit /b 1
 )
 
-if exist "%TARGET_DIR%\compose.yaml" (
+if exist "%TARGET_DIR%\setup.bat" (
   cd /d "%TARGET_DIR%"
-  call Install.bat %ACTION%
+  call setup.bat %*
   exit /b %ERRORLEVEL%
 )
 
 echo Local launcher files were not found.
 echo Downloading JMusicBot-JP-Docker-%RELEASE_TAG%.zip ...
+echo Extracting to: %TARGET_DIR%
 
 set "POWERSHELL_EXE="
 if exist "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" set "POWERSHELL_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
@@ -111,12 +60,12 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "%TARGET_DIR%\compose.yaml" (
+if not exist "%TARGET_DIR%\setup.bat" (
   echo Extracted bundle was not found: %TARGET_DIR%
   pause
   exit /b 1
 )
 
 cd /d "%TARGET_DIR%"
-call Install.bat %ACTION%
+call setup.bat %*
 exit /b %ERRORLEVEL%

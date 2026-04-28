@@ -40,6 +40,22 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+GitHub Release の単体インストーラーを使う場合:
+
+- Windows: `Install-JMusicBot-Docker-Windows.bat`
+- macOS: `Install-JMusicBot-Docker-macOS.command`
+- Linux: `Install-JMusicBot-Docker-Linux.sh`
+
+単体インストーラーは同じ Release の zip bundle を自動でダウンロードし、インストーラーを置いたフォルダ直下へ `JMusicBot-JP-Docker-<tag>/` として展開します。たとえば `Downloads` で実行すると、`Downloads/JMusicBot-JP-Docker-0.11.0.7/` のようなフォルダができます。
+
+その後は展開先の `setup.bat` / `setup.command` / `setup.sh` が実行されます。設定ファイルは展開先の `docker-data/config.txt`、Windows では `docker-data\config.txt` です。
+
+Docker 起動後に削除してよいもの / 残すもの:
+
+- 削除してよい: 最初にダウンロードした単体インストーラー、手動でダウンロードした zip、OS の一時フォルダに残った zip。
+- 残す: 展開された `JMusicBot-JP-Docker-<tag>/` フォルダ。特に `docker-data/` には `config.txt`、プレイリスト、取得済み jar cache が入ります。
+- `docker-data/` を削除すると設定と保存データが消えます。通常の更新やアンインストールでは残してください。
+
 初回起動では `docker-data/config.txt` が自動生成されます。生成直後は token と owner が未設定なので Bot は起動せず、設定を促すログを出して停止します。
 
 `docker-data/config.txt` を編集してから、同じスクリプトをもう一度実行してください。Windows では `docker-data\config.txt`、Linux / WSL では `docker-data/config.txt` として見えます。
@@ -271,6 +287,8 @@ Release assets には、zip bundle に加えて次の単体インストーラを
 - `Install-JMusicBot-Docker-Windows.bat`
 - `Install-JMusicBot-Docker-macOS.command`
 - `Install-JMusicBot-Docker-Linux.sh`
+
+単体インストーラは `JMusicBot-JP-Docker-<tag>.zip` を取得し、実行場所の直下へ `JMusicBot-JP-Docker-<tag>/` を展開してから `setup.*` を実行します。zip bundle 内の `Install.*` は互換用の名前として残します。
 
 Release まで進める場合は、作業ツリーを clean にしてから `./scripts/release.sh` を使います。この script は upstream `Cosgy-Dev/JMusicBot-JP` の latest release tag を取得し、この repo の release tag として push します。upstream tag が既にこの repo に存在する場合は、`0.11.0.5` のように末尾へ launcher patch 番号を付けます。
 
