@@ -1,0 +1,12 @@
+prompt = """
+この session の context bloat を点検してください。
+
+次を行ってください。
+1. 現在の task size を small / medium / deep に分類する。
+2. いま読むべき文書と、まだ読まなくてよい文書を分ける。
+3. `GEMINI.md`、`AGENTS.md`、`docs/` のうち、今の task に不要そうなものがあれば明示する。
+4. 変更後に reload が必要なら、`/memory reload`, `/commands reload`, `/agents reload`, `/skills reload` のどれを使うか提案する。
+5. session が重くなっていそうなら、可能であれば `/stats` で確認すべきと伝える。
+6. 最後に、最小の次の一手だけを書く。
+7. 回答は原則日本語で、結論 / 理由 / 手順の順にする。
+"""

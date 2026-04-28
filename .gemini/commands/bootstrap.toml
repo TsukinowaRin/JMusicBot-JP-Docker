@@ -1,0 +1,13 @@
+prompt = """
+このリポジトリの初期ブートストラップを行ってください。
+
+次の順で進めてください。
+1. まず task size を small / medium / deep で判断し、小タスクなら `bootstrap-fast` を優先する。文脈が重そうなら `context-audit` も使う。
+2. 現在の user request と、その task に関係する project artifact を一次情報として扱い、`docs/REQS.md` を先に更新する。
+3. deep path が必要なら `docs/AGENT_BOOTSTRAP.md` の順序で必読文書を読む。
+4. `docs/PROJECT_BRIEF.md` や `docs/WORKLOG.md` が scaffold / stale なら、現在の repo 用に更新する。
+5. プロジェクトの全体像、ツール利用ルール、現在の要求を要約する。
+6. 作業が複雑そうなら、実装前に `docs/EXECPLAN_<date>_<topic>.md` の作成を提案する。
+7. 最後に、仮定、検証計画、最初の具体的な一手を書く。
+8. 回答は原則日本語で行う。
+"""

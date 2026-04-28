@@ -40,30 +40,35 @@ echo "Upstream latest tag: ${tag}"
 
 git fetch --tags origin >/dev/null 2>&1 || true
 
-latest_local_tag="$(
-  git tag -l "${tag}.*" \
-    | awk -F. -v base="${tag}" '
-        index($0, base ".") == 1 && $NF ~ /^[0-9]+$/ {
-          suffix = $NF + 0
-          if (suffix > max) {
-            max = suffix
-          }
-        }
-        END {
-          if (max > 0) {
-            print max
-          }
-        }
-      '
-)"
-
-if [ -n "${latest_local_tag}" ]; then
-  next_suffix=$((latest_local_tag + 1))
+existing_head_tag="$(git tag --points-at HEAD | awk -v base="${tag}" '$0 == base || index($0, base ".") == 1 { print; exit }')"
+if [ -n "${existing_head_tag}" ]; then
+  release_tag="${existing_head_tag}"
 else
-  next_suffix=1
-fi
+  latest_local_tag="$(
+    git tag -l "${tag}.*" \
+      | awk -F. -v base="${tag}" '
+          index($0, base ".") == 1 && $NF ~ /^[0-9]+$/ {
+            suffix = $NF + 0
+            if (suffix > max) {
+              max = suffix
+            }
+          }
+          END {
+            if (max > 0) {
+              print max
+            }
+          }
+        '
+  )"
 
-release_tag="${tag}.${next_suffix}"
+  if [ -n "${latest_local_tag}" ]; then
+    next_suffix=$((latest_local_tag + 1))
+  else
+    next_suffix=1
+  fi
+
+  release_tag="${tag}.${next_suffix}"
+fi
 
 echo "Release tag for this repository: ${release_tag}"
 

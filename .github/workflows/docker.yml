@@ -86,11 +86,11 @@ jobs:
           bundle_dir="release-assets/JMusicBot-JP-Docker-${TAG_NAME}"
           mkdir -p "${bundle_dir}/scripts"
           cp README.md Dockerfile compose.yaml config.template.txt "${bundle_dir}/"
-          cp setup.bat setup.command setup.sh Install.bat Install.command Install.sh "${bundle_dir}/"
+          cp setup.bat setup.command setup.sh update.bat update.sh uninstall.bat uninstall.sh Install.bat Install.command Install.sh "${bundle_dir}/"
           cp scripts/entrypoint.sh "${bundle_dir}/scripts/"
           sed -i "s/__RELEASE_TAG__/${TAG_NAME}/g" Install.bat "${bundle_dir}/Install.bat"
-          chmod +x Install.command Install.sh setup.command setup.sh scripts/entrypoint.sh
-          chmod +x "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh" "${bundle_dir}/setup.command" "${bundle_dir}/setup.sh" "${bundle_dir}/scripts/entrypoint.sh"
+          chmod +x Install.command Install.sh setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh
+          chmod +x "${bundle_dir}/Install.command" "${bundle_dir}/Install.sh" "${bundle_dir}/setup.command" "${bundle_dir}/setup.sh" "${bundle_dir}/update.sh" "${bundle_dir}/uninstall.sh" "${bundle_dir}/scripts/entrypoint.sh"
           cd release-assets
           zip -r "../JMusicBot-JP-Docker-${TAG_NAME}.zip" "JMusicBot-JP-Docker-${TAG_NAME}"
 
@@ -111,16 +111,79 @@ jobs:
               '',
               `Tag: \`${tag}\``,
               '',
-              '### Container Image',
+              'This image downloads the latest `Cosgy-Dev/JMusicBot-JP` release jar at container startup.',
+              '',
+              '### 1. Pull image',
               '',
               '```bash',
               `docker pull ${image}:${tag}`,
               '```',
               '',
+              '### 2. Create config.txt',
+              '',
+              'Linux / macOS / WSL:',
+              '',
+              '```bash',
+              'mkdir -p docker-data',
+              `docker run --rm -v "$(pwd)/docker-data:/data" ${image}:${tag}`,
+              '```',
+              '',
+              'Windows PowerShell:',
+              '',
+              '```powershell',
+              'New-Item -ItemType Directory -Force docker-data',
+              `docker run --rm -v "$((Get-Location).Path)\\docker-data:/data" ${image}:${tag}`,
+              '```',
+              '',
+              'The first run creates `docker-data/config.txt` and stops because `token` and `owner` are still placeholders.',
+              'It may exit with a non-zero status on this first run. That is expected if `docker-data/config.txt` was created.',
+              '',
+              'Edit `docker-data/config.txt`:',
+              '',
+              '```txt',
+              'token = "YOUR_DISCORD_BOT_TOKEN"',
+              'owner = 123456789012345678',
+              '```',
+              '',
+              '- `token` must be a Discord Bot token and must be quoted.',
+              '- `owner` must be your Discord user ID and is written without quotes.',
+              '- Do not commit or publish a real `docker-data/config.txt` containing tokens.',
+              '',
+              '### 3. Start bot',
+              '',
+              'Linux / macOS / WSL:',
+              '',
+              '```bash',
+              'docker run -d \\',
+              '  --name jmusicbot-jp \\',
+              '  --restart unless-stopped \\',
+              '  -v "$(pwd)/docker-data:/data" \\',
+              `  ${image}:${tag}`,
+              '```',
+              '',
+              'Windows PowerShell:',
+              '',
+              '```powershell',
+              'docker run -d `',
+              '  --name jmusicbot-jp `',
+              '  --restart unless-stopped `',
+              '  -v "$((Get-Location).Path)\\docker-data:/data" `',
+              `  ${image}:${tag}`,
+              '```',
+              '',
+              'Logs:',
+              '',
+              '```bash',
+              'docker logs -f jmusicbot-jp',
+              '```',
+              '',
               '### Notes',
               '',
-              '- This image downloads the latest `Cosgy-Dev/JMusicBot-JP` release jar at container startup.',
-              '- Release assets include `Install.bat`, `Install.command`, `Install.sh`, and a zip bundle for local Docker-based setup.'
+              '- Release assets include `Install.bat`, `Install.command`, `Install.sh`, and a zip bundle for local Docker-based setup.',
+              '- If you use this repository locally, `setup.bat` works on Windows and `./setup.sh` works on Linux / WSL.',
+              '- `config.template.txt` is only the template. Edit the generated `docker-data/config.txt` for actual bot settings.',
+              '- To refresh the upstream jar while keeping config, use `update.bat` or `./update.sh`.',
+              '- To remove the container, use `uninstall.bat` or `./uninstall.sh`; `docker-data/` is kept by default.'
             ].join('\n');
             const assets = [
               { name: `JMusicBot-JP-Docker-${tag}.zip`, path: `JMusicBot-JP-Docker-${tag}.zip`, contentType: 'application/zip' },

@@ -1,0 +1,39 @@
+{
+  "context": {
+    "fileName": [
+      "AGENTS.md",
+      "GEMINI.md"
+    ]
+  },
+  "general": {
+    "defaultApprovalMode": "default"
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; python3 \"$ROOT/.gemini/hooks/session_start_context.py\"",
+            "description": "初回コンテキストの補足を注入する"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command|write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; python3 \"$ROOT/.gemini/hooks/before_tool_policy.py\"",
+            "description": "危険なコマンドと secret 編集を止める"
+          }
+        ]
+      }
+    ]
+  }
+}

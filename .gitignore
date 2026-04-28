@@ -1,4 +1,9 @@
 docker-data/
-.codex
+__pycache__/
+*.pyc
 *.log
 .DS_Store
+.tmp-release-standalone/
+CLAUDE.local.md
+.claude/settings.local.json
+.gemini/tmp/
