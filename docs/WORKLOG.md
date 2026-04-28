@@ -5,9 +5,9 @@
 ## 現在の状態
 
 - 現在の作業:
-  - Release 単体 installer の配置先を `Downloads` 依存から OS のアプリデータ領域へ変更。
+  - Windows installer の進捗表示改善と `setup.bat` メニュー表示バグ修正。
 - 直近の状態:
-  - 単体 installer の配置先を OS アプリデータ領域へ変更し、README / Release body も更新した。構文チェックと Linux / macOS installer smoke は完了。
+  - `Install.bat` に step 表示と必要ファイル検証を追加。`setup.bat` のメニューを `[1]` 形式に変更し、Windows `cmd.exe` smoke も通した。
 - 次にやること:
   - commit / push / release する。
 - ブロッカー:
@@ -20,6 +20,39 @@
 ---
 
 ## エントリ
+
+### 2026-04-28 18:45 JST
+
+- 目的:
+  - Windows 単体 installer の進行状況を分かりやすくし、`setup.bat` メニュー表示がコマンドとして誤実行される問題を直す。
+- 変更:
+  - `docs/REQS.md` を今回依頼で更新。
+  - `Install.bat` に `[1/5]` から `[5/5]` の進捗表示を追加。
+  - `Install.bat` の PowerShell 処理内で install dir、temp dir、download URL、download 完了、copy、cleanup を表示するよう変更。
+  - `Install.bat` が `setup.bat` / `compose.yaml` / `config.template.txt` を検証してから `setup.bat` を起動するよう変更。
+  - `setup.bat` のメニュー表示を `[1]` 形式に変更し、`if (...)` ブロック外へ出して batch parser に壊されにくくした。
+- コマンドと結果:
+  - `sh -n Install.sh Install.command setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`: 成功。
+  - `docker compose config`: 成功。
+  - `.github/workflows/docker.yml` の `github-script` 部分を `node --input-type=module --check` で確認: 成功。
+  - `git diff --check`: 成功。`Install.bat` / `setup.bat` は `.gitattributes` により commit 時に CRLF へ正規化される警告のみ。
+  - Windows `cmd.exe` menu smoke: CRLF 正規化した一時コピーで `setup.bat` を実行し、`[1]` から `[5]` のメニューが command 誤実行なしで表示されることを確認。
+  - Windows `Install.bat` smoke: tag `0.11.0.8` を埋め込んだ一時 installer を `cmd.exe` から実行し、`[1/5]` から `[5/5]` の進捗、download、copy、必要ファイル検証、`setup.bat` 到達を確認。`__probe__` action のため最終 exit は 1 だが install 自体は成功。
+- 判断 / 仮定:
+  - `セットアップ` が command として扱われた原因は、メニュー表示行の `)` と parenthesized block の組み合わせ。`[1]` 形式と block 外表示で回避する。
+- 未完了:
+  - commit、push、release。
+- 次:
+  - Windows path 上に一時コピーして `.bat` 単体 install smoke を行う。
+- 次に最初に読む文書:
+  - `docs/REQS.md`
+- 次に最初に実行するコマンド:
+  - `cmd.exe /c ...`
+- ブロッカー:
+  - なし。
+- 参照すべきファイル:
+  - `Install.bat`
+  - `setup.bat`
 
 ### 2026-04-28 18:20 JST
 

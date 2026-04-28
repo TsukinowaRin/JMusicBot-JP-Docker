@@ -9,34 +9,30 @@ set "CONFIG_TEMPLATE=config.template.txt"
 
 where docker >nul 2>nul
 if errorlevel 1 (
-  echo Docker が見つかりません。Docker Desktop もしくは Docker Engine をインストールしてください。
+  echo Docker was not found. Install Docker Desktop or Docker Engine first.
   pause
   exit /b 1
 )
 
 if not exist docker-data mkdir docker-data
 
-if "%ACTION%"=="" (
-  echo 操作を選択してください。
-  echo 1^) セットアップ / 起動
-  echo 2^) 更新
-  echo 3^) 設定ファイルを開く
-  echo 4^) ログを表示
-  echo 5^) アンインストール
-  choice /C 12345 /N /M "選択 [1/2/3/4/5]: "
-  if errorlevel 5 (
-    set "ACTION=uninstall"
-  ) else if errorlevel 4 (
-    set "ACTION=logs"
-  ) else if errorlevel 3 (
-    set "ACTION=config"
-  ) else if errorlevel 2 (
-    set "ACTION=update"
-  ) else (
-    set "ACTION=setup"
-  )
-  echo.
-)
+if not "%ACTION%"=="" goto normalize_action
+
+echo Select an action.
+echo [1] Setup / Start
+echo [2] Update
+echo [3] Open config.txt
+echo [4] Show logs
+echo [5] Uninstall
+choice /C 12345 /N /M "Choice [1/2/3/4/5]: "
+if errorlevel 5 set "ACTION=uninstall"
+if errorlevel 4 if "%ACTION%"=="" set "ACTION=logs"
+if errorlevel 3 if "%ACTION%"=="" set "ACTION=config"
+if errorlevel 2 if "%ACTION%"=="" set "ACTION=update"
+if "%ACTION%"=="" set "ACTION=setup"
+echo.
+
+:normalize_action
 
 if /I "%ACTION%"=="1" set "ACTION=setup"
 if /I "%ACTION%"=="2" set "ACTION=update"
@@ -56,6 +52,7 @@ if /I "%ACTION%"=="setup" (
   call :ensure_configured
   if errorlevel 1 exit /b %ERRORLEVEL%
   echo Updating JMusicBot-JP launcher...
+  echo Keeping docker-data\config.txt and removing only docker-data\runtime.
   docker compose down
   if exist docker-data\runtime rmdir /S /Q docker-data\runtime
   docker compose up -d --build --force-recreate
@@ -79,7 +76,7 @@ if /I "%ACTION%"=="setup" (
 )
 
 if errorlevel 1 (
-  echo Docker 起動に失敗しました。
+  echo Docker startup failed.
   pause
   exit /b 1
 )
@@ -93,32 +90,32 @@ exit /b 0
 if not exist docker-data mkdir docker-data
 if exist "%CONFIG_FILE%" exit /b 0
 if not exist "%CONFIG_TEMPLATE%" (
-  echo %CONFIG_TEMPLATE% が見つかりません。
+  echo %CONFIG_TEMPLATE% was not found.
   pause
   exit /b 1
 )
 copy "%CONFIG_TEMPLATE%" "%CONFIG_FILE%" >nul
 if errorlevel 1 (
-  echo %CONFIG_FILE% の作成に失敗しました。
+  echo Failed to create %CONFIG_FILE%.
   pause
   exit /b 1
 )
-echo %CONFIG_FILE% を作成しました。
+echo Created %CONFIG_FILE%.
 exit /b 0
 
 :config_has_placeholders
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$config = Get-Content -Raw -LiteralPath '%CONFIG_FILE%'; if ($config -match 'Botトークンをここに貼り付け|BOT_TOKEN_HERE|所有者IDをここに貼り付け' -or $config -match '(?m)^\s*owner\s*=\s*0\s*$') { exit 1 } exit 0"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$config = Get-Content -Raw -LiteralPath '%CONFIG_FILE%'; $quote = [char]34; if ($config -match ('(?m)^\s*token\s*=\s*' + $quote + '(?:Bot|BOT_TOKEN_HERE)') -or $config -match '(?m)^\s*owner\s*=\s*(?:0|[^0-9\r\n])') { exit 1 } exit 0"
 exit /b %ERRORLEVEL%
 
 :open_config
 echo.
-echo 設定ファイルを開きます: %CONFIG_FILE%
+echo Opening config file: %CONFIG_FILE%
 echo.
-echo 最低限、次の 2 行を設定してください。
+echo Set at least these 2 lines.
 echo   token = "Discord Bot token"
 echo   owner = 123456789012345678
 echo.
-echo token はダブルクォートあり、owner は数字のみです。
+echo token must be quoted. owner must be numbers only.
 notepad "%CONFIG_FILE%"
 exit /b 0
 
@@ -130,36 +127,36 @@ call :config_has_placeholders
 if not errorlevel 1 exit /b 0
 
 echo.
-echo %CONFIG_FILE% の token または owner が未設定です。
+echo token or owner is not configured in %CONFIG_FILE%.
 call :open_config
 
 call :config_has_placeholders
 if not errorlevel 1 exit /b 0
 
 echo.
-echo token または owner がまだ未設定です。
-echo 設定後に setup.bat をもう一度実行してください。
+echo token or owner is still not configured.
+echo Save the config, then run setup.bat again.
 pause
 exit /b 1
 
 :run_uninstall
-echo JMusicBot-JP Docker container を停止して削除します。
-echo docker-data は設定ファイルやプレイリストを含むため、既定では残します。
+echo Stopping and removing the JMusicBot-JP Docker container.
+echo docker-data contains config and playlists, so it is kept by default.
 echo.
 
 docker compose down --remove-orphans
 docker rm -f jmusicbot-jp >nul 2>nul
 
 echo.
-choice /C YN /N /M "docker-data も削除しますか？ token / owner / playlists が消えます [y/N]: "
+choice /C YN /N /M "Delete docker-data too? token / owner / playlists will be removed [y/N]: "
 if errorlevel 2 (
-  echo docker-data は残しました。
+  echo Kept docker-data.
 ) else (
   if exist docker-data rmdir /S /Q docker-data
-  echo docker-data を削除しました。
+  echo Deleted docker-data.
 )
 
 echo.
-echo アンインストール処理が完了しました。
+echo Uninstall completed.
 pause
 exit /b 0

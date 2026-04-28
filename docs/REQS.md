@@ -5,21 +5,20 @@
 ## 依頼内容
 
 - 依頼:
-  - Release assets の単体インストーラーが `Downloads` など実行場所へ依存する設計をやめる。
-  - 後から `config.txt` を編集でき、掃除ツールで消えにくい永続領域へ launcher 一式を置く。
+  - Windows の単体 `Install-JMusicBot-Docker-Windows.bat` が、どの処理をしているか分かりづらいので改善する。
+  - `setup.bat` のメニュー表示で `セットアップ` / `ログを表示` などがコマンドとして誤実行される問題を直す。
+  - `.bat` 単体で正常に install できるか確認する。
 - 背景:
-  - `Downloads/JMusicBot-JP-Docker-<tag>/` へ展開すると、ユーザーの掃除やセキュリティソフトで削除されうる。
-  - Docker named volume に隠すと `config.txt` の手動編集が難しくなる。
-  - OS 標準のアプリデータ領域へ置き、その中の `docker-data/` を Docker の `/data` へ bind mount するのが編集しやすく消えにくい。
+  - 現状は `Installing ...` の後、PowerShell 内で download / extract / copy が無言に近く、進行中か停止中か判断しづらい。
+  - `setup.bat` は `if (...)` ブロック内で `echo 1^) ...` を使っており、Windows batch の解析でメニュー行が壊れて実行される環境がある。
 
 ## 目標
 
-1. Windows 単体 installer は `%LOCALAPPDATA%\JMusicBot-JP-Docker` へ launcher を配置して `setup.bat` を実行する。
-2. macOS 単体 installer は `~/Library/Application Support/JMusicBot-JP-Docker` へ launcher を配置して `setup.command` を実行する。
-3. Linux 単体 installer は `${XDG_DATA_HOME:-~/.local/share}/jmusicbot-jp-docker` へ launcher を配置して `setup.sh` を実行する。
-4. `JMUSICBOT_INSTALL_DIR` で配置先を上書きできるようにする。
-5. README / release body に配置先、`docker-data/` の扱い、削除してよいファイルを明記する。
-6. 新しい tag release を作成し、修正版 assets を添付する。
+1. `Install.bat` が Docker 確認、install dir、temp dir、download URL、download 完了、copy、verify、setup 起動を順番に表示する。
+2. `Install.bat` が `setup.bat` / `compose.yaml` / `config.template.txt` の存在を検証してから `setup.bat` を起動する。
+3. `setup.bat` のメニュー表示を batch parser に壊されにくい `[1]` 形式へ変更し、`if (...)` ブロック外で表示する。
+4. Windows 側 `cmd.exe` で `.bat` 単体の install smoke を行う。
+5. 新しい tag release を作成し、修正版 assets を添付する。
 
 ## 非目標
 
@@ -36,21 +35,18 @@
 
 ## 受け入れ条件
 
-- [x] Windows installer が `%LOCALAPPDATA%\JMusicBot-JP-Docker` へコピーして `setup.bat` を実行する。
-- [x] macOS installer が `~/Library/Application Support/JMusicBot-JP-Docker` へコピーして `setup.command` を実行する。
-- [x] Linux installer が `${XDG_DATA_HOME:-~/.local/share}/jmusicbot-jp-docker` へコピーして `setup.sh` を実行する。
-- [x] `JMUSICBOT_INSTALL_DIR` で配置先を上書きできる。
-- [x] README に配置先、`docker-data/` の扱い、削除してよいファイルを明記する。
-- [x] Release body に同じ注意を明記する。
+- [x] `Install.bat` に step 表示を追加する。
+- [x] `Install.bat` が install 後に必要ファイルを検証する。
+- [x] `setup.bat` のメニューが `[1]` 形式で正しく表示される。
+- [x] Windows 側 `cmd.exe` で `.bat` 単体 install smoke を通す。
 - [x] 変更範囲に近い構文チェックを通す。
 - [ ] commit / push / release を完了する。
 
 ## 未解決事項
 
-- Windows / macOS 実機でのダブルクリック実行までは未検証。構文と bootstrap logic を静的に確認する。
+- Windows の GUI ダブルクリック操作までは未検証。`cmd.exe` からの実行で install smoke を行う。
 
 ## 仮定
 
-- 今回の依頼は release installer / docs の medium task と分類する。
-- Docker named volume だけに移すのは、後から設定を書き換えにくいため避ける。
-- stable install directory 配下の `docker-data/` は残す必要がある。
+- 今回の依頼は Windows installer / setup menu の medium task と分類する。
+- 実 token / owner は設定しない。install smoke は未知 action を渡して `setup.bat` まで到達することを確認する。
