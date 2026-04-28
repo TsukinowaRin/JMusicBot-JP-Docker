@@ -5,19 +5,21 @@
 ## 依頼内容
 
 - 依頼:
-  - Release assets の単体インストールファイルがうまく動かない問題を修正する。
-  - ダウンロードした launcher bundle の展開先、Docker 起動後に消してよいファイル / 残すべきファイルを説明する。
+  - Release assets の単体インストーラーが `Downloads` など実行場所へ依存する設計をやめる。
+  - 後から `config.txt` を編集でき、掃除ツールで消えにくい永続領域へ launcher 一式を置く。
 - 背景:
-  - Windows の単体 installer は zip を取得するが、Docker 起動処理が `setup.bat` ではなく簡易 compose 起動に寄っていた。
-  - macOS / Linux の単体 installer は同じフォルダに `setup.command` / `setup.sh` がある前提で、zip 外の単体 asset としては bootstrap できなかった。
-  - `docker-data/` はコンテナへ bind mount されるため、削除すると config / playlist / jar cache が消える。
+  - `Downloads/JMusicBot-JP-Docker-<tag>/` へ展開すると、ユーザーの掃除やセキュリティソフトで削除されうる。
+  - Docker named volume に隠すと `config.txt` の手動編集が難しくなる。
+  - OS 標準のアプリデータ領域へ置き、その中の `docker-data/` を Docker の `/data` へ bind mount するのが編集しやすく消えにくい。
 
 ## 目標
 
-1. zip 外の Windows / macOS / Linux 単体 installer が、必要な zip bundle を取得して展開し、展開先の `setup.*` を実行できるようにする。
-2. zip bundle 内の `Install.*` も `setup.*` へ委譲し、config 作成 / 編集導線を統一する。
-3. README / release body に展開先と削除してよいファイル / 残すべきファイルを明記する。
-4. 新しい tag release を作成し、修正版 assets を添付する。
+1. Windows 単体 installer は `%LOCALAPPDATA%\JMusicBot-JP-Docker` へ launcher を配置して `setup.bat` を実行する。
+2. macOS 単体 installer は `~/Library/Application Support/JMusicBot-JP-Docker` へ launcher を配置して `setup.command` を実行する。
+3. Linux 単体 installer は `${XDG_DATA_HOME:-~/.local/share}/jmusicbot-jp-docker` へ launcher を配置して `setup.sh` を実行する。
+4. `JMUSICBOT_INSTALL_DIR` で配置先を上書きできるようにする。
+5. README / release body に配置先、`docker-data/` の扱い、削除してよいファイルを明記する。
+6. 新しい tag release を作成し、修正版 assets を添付する。
 
 ## 非目標
 
@@ -34,10 +36,11 @@
 
 ## 受け入れ条件
 
-- [x] Windows 単体 installer が `JMusicBot-JP-Docker-<tag>/` を展開し、`setup.bat` を実行する。
-- [x] macOS 単体 installer が `JMusicBot-JP-Docker-<tag>/` を展開し、`setup.command` を実行する。
-- [x] Linux 単体 installer が `JMusicBot-JP-Docker-<tag>/` を展開し、`setup.sh` を実行する。
-- [x] README に展開先、`docker-data/` の扱い、削除してよいファイルを明記する。
+- [x] Windows installer が `%LOCALAPPDATA%\JMusicBot-JP-Docker` へコピーして `setup.bat` を実行する。
+- [x] macOS installer が `~/Library/Application Support/JMusicBot-JP-Docker` へコピーして `setup.command` を実行する。
+- [x] Linux installer が `${XDG_DATA_HOME:-~/.local/share}/jmusicbot-jp-docker` へコピーして `setup.sh` を実行する。
+- [x] `JMUSICBOT_INSTALL_DIR` で配置先を上書きできる。
+- [x] README に配置先、`docker-data/` の扱い、削除してよいファイルを明記する。
 - [x] Release body に同じ注意を明記する。
 - [x] 変更範囲に近い構文チェックを通す。
 - [ ] commit / push / release を完了する。
@@ -49,5 +52,5 @@
 ## 仮定
 
 - 今回の依頼は release installer / docs の medium task と分類する。
-- 単体 installer の展開先は、installer を置いたフォルダ直下の `JMusicBot-JP-Docker-<tag>/` とする。
-- Docker 起動後も、compose 管理と host bind mount のため `JMusicBot-JP-Docker-<tag>/docker-data/` は残す必要がある。
+- Docker named volume だけに移すのは、後から設定を書き換えにくいため避ける。
+- stable install directory 配下の `docker-data/` は残す必要がある。

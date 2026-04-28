@@ -7,8 +7,13 @@ case "${RELEASE_TAG}" in
   __*) RELEASE_TAG="" ;;
 esac
 RELEASE_REPO="${JMUSICBOT_LAUNCHER_REPO:-TsukinowaRin/JMusicBot-JP-Docker}"
-TARGET_DIR="${SCRIPT_DIR}/JMusicBot-JP-Docker-${RELEASE_TAG}"
 DOWNLOAD_URL="https://github.com/${RELEASE_REPO}/releases/download/${RELEASE_TAG}/JMusicBot-JP-Docker-${RELEASE_TAG}.zip"
+
+if [ -n "${JMUSICBOT_INSTALL_DIR:-}" ]; then
+  INSTALL_DIR="${JMUSICBOT_INSTALL_DIR}"
+else
+  INSTALL_DIR="${HOME}/Library/Application Support/JMusicBot-JP-Docker"
+fi
 
 run_setup() {
   setup_path="$1"
@@ -68,21 +73,25 @@ if [ -z "${RELEASE_TAG}" ]; then
   exit 1
 fi
 
-if [ -f "${TARGET_DIR}/setup.command" ]; then
-  run_setup "${TARGET_DIR}/setup.command" "$@"
-fi
+echo "Installing JMusicBot-JP Docker launcher to:"
+echo "  ${INSTALL_DIR}"
+echo
 
-echo "Local launcher files were not found."
-echo "Downloading JMusicBot-JP-Docker-${RELEASE_TAG}.zip ..."
-echo "Extracting to: ${TARGET_DIR}"
+tmp_root=$(mktemp -d "${TMPDIR:-/tmp}/jmusicbot-jp-docker.XXXXXX")
+trap 'rm -rf "${tmp_root}"' EXIT HUP INT TERM
+tmp_zip="${tmp_root}/JMusicBot-JP-Docker-${RELEASE_TAG}.zip"
+source_dir="${tmp_root}/JMusicBot-JP-Docker-${RELEASE_TAG}"
 
-tmp_zip="${TMPDIR:-/tmp}/JMusicBot-JP-Docker-${RELEASE_TAG}.zip"
 download_file "${DOWNLOAD_URL}" "${tmp_zip}"
-extract_zip "${tmp_zip}" "${SCRIPT_DIR}"
+extract_zip "${tmp_zip}" "${tmp_root}"
 
-if [ ! -f "${TARGET_DIR}/setup.command" ]; then
-  echo "Extracted bundle was not found: ${TARGET_DIR}" >&2
+if [ ! -f "${source_dir}/setup.command" ]; then
+  echo "Extracted bundle was not found: ${source_dir}" >&2
   exit 1
 fi
 
-run_setup "${TARGET_DIR}/setup.command" "$@"
+mkdir -p "${INSTALL_DIR}"
+cp -R "${source_dir}/." "${INSTALL_DIR}/"
+chmod +x "${INSTALL_DIR}/setup.sh" "${INSTALL_DIR}/setup.command" "${INSTALL_DIR}/update.sh" "${INSTALL_DIR}/uninstall.sh" "${INSTALL_DIR}/Install.sh" "${INSTALL_DIR}/Install.command" "${INSTALL_DIR}/scripts/entrypoint.sh" 2>/dev/null || true
+
+run_setup "${INSTALL_DIR}/setup.command" "$@"

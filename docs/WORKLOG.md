@@ -5,9 +5,9 @@
 ## 現在の状態
 
 - 現在の作業:
-  - Release 単体 installer の bootstrap 修正と展開先 / 削除可否の明文化。
+  - Release 単体 installer の配置先を `Downloads` 依存から OS のアプリデータ領域へ変更。
 - 直近の状態:
-  - Windows / macOS / Linux 単体 installer の bootstrap 修正と docs 更新が完了。構文チェックと release asset 生成の主要確認も完了。
+  - 単体 installer の配置先を OS アプリデータ領域へ変更し、README / Release body も更新した。構文チェックと Linux / macOS installer smoke は完了。
 - 次にやること:
   - commit / push / release する。
 - ブロッカー:
@@ -20,6 +20,44 @@
 ---
 
 ## エントリ
+
+### 2026-04-28 18:20 JST
+
+- 目的:
+  - 単体 installer が `Downloads` など実行場所へ依存しないよう、安定したアプリデータ領域へ launcher を配置する。
+- 変更:
+  - `docs/REQS.md` を今回依頼で更新。
+  - `Install.bat` は `%LOCALAPPDATA%\JMusicBot-JP-Docker`、または `JMUSICBOT_INSTALL_DIR` へ zip 内容をコピーしてから `setup.bat` を実行するよう変更。
+  - `Install.command` は `~/Library/Application Support/JMusicBot-JP-Docker`、または `JMUSICBOT_INSTALL_DIR` へコピーしてから `setup.command` を実行するよう変更。
+  - `Install.sh` は `${XDG_DATA_HOME:-~/.local/share}/jmusicbot-jp-docker`、または `JMUSICBOT_INSTALL_DIR` へコピーしてから `setup.sh` を実行するよう変更。
+  - `.github/workflows/docker.yml` の Release body に新しい配置先と `JMUSICBOT_INSTALL_DIR` を追記。
+  - `README.md` に新しい配置先、削除してよいファイル、残すべき `docker-data/` を追記。
+- コマンドと結果:
+  - `sh -n Install.sh Install.command setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`: 成功。
+  - `docker compose config`: 成功。
+  - `.github/workflows/docker.yml` の `github-script` 部分を `node --input-type=module --check` で確認: 成功。
+  - `git diff --check`: 成功。`Install.bat` は `.gitattributes` により commit 時に CRLF へ正規化される警告のみ。
+  - `Install.sh` smoke: `JMUSICBOT_INSTALL_DIR` に指定した一時 appdata へ 0.11.0.7 bundle をコピーし、実行場所直下へ展開フォルダが残らないことを確認。
+  - `Install.command` smoke: スペースを含む `JMUSICBOT_INSTALL_DIR` にコピーし、`setup.command` へ委譲できることを確認。
+  - release asset 生成の主要手順 smoke: OS 別単体 installer 生成、release tag 埋め込み、bundle 内 `setup.*` 配置を確認。
+- 判断 / 仮定:
+  - Docker named volume へ完全に隠すと `config.txt` を編集しづらい。ホスト側のアプリデータ領域に `docker-data/` を置き、それを Docker の `/data` へ bind mount する設計にする。
+- 未完了:
+  - commit、push、release。
+- 次:
+  - shell 構文、Compose、release script、installer smoke を確認する。
+- 次に最初に読む文書:
+  - `docs/REQS.md`
+- 次に最初に実行するコマンド:
+  - `sh -n Install.sh Install.command setup.command setup.sh update.sh uninstall.sh scripts/entrypoint.sh scripts/release.sh`
+- ブロッカー:
+  - なし。
+- 参照すべきファイル:
+  - `Install.bat`
+  - `Install.command`
+  - `Install.sh`
+  - `.github/workflows/docker.yml`
+  - `README.md`
 
 ### 2026-04-28 16:05 JST
 
