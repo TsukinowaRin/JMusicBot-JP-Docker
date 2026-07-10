@@ -1,0 +1,14 @@
+prompt = """
+この repo を fast path で bootstrap してください。
+
+次の順で進めてください。
+1. タスクを small / medium / deep に分類する。
+2. 現在の user request と、その task に関係する project artifact を一次情報として扱い、`docs/REQS.md` を先に更新する。
+3. small なら `docs/PROJECT_BRIEF.md` と更新済み `docs/REQS.md` だけ読む。
+4. medium なら `docs/INDEX.md` を追加する。
+5. deep または handoff 再開なら `docs/AGENT_BOOTSTRAP.md` の deep path に切り替える。
+6. `docs/PROJECT_BRIEF.md` が scaffold / stale なら、repo 実態に合わせて最小限更新する。
+7. 変更前に必要なコードや docs だけを狭く読む。
+8. 最後に、選んだ path、まだ読んでいない文書、最初の具体的な一手を書く。
+9. 回答は原則日本語で、結論 / 理由 / 手順の順にする。
+"""

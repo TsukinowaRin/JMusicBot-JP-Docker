@@ -1,0 +1,12 @@
+services:
+  jmusicbot:
+    build:
+      context: .
+    image: jmusicbot-jp:local
+    container_name: jmusicbot-jp
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Tokyo
+      JAVA_OPTS: ""
+    volumes:
+      - ./docker-data:/data

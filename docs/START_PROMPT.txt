@@ -1,0 +1,30 @@
+この repo で作業を始めてください。
+短縮版では「DocsとAGENTS.mdを読んで」と指示されても同じ意味として扱ってください。
+
+最初に行うこと:
+1. まず task size を small / medium / deep に分類する
+2. 現在の user request と、その task に関係する project artifact を主タスクの一次情報として扱う
+3. `docs/REQS.md` を現在の依頼で更新してから使う
+4. `docs/PROJECT_BRIEF.md` や `docs/WORKLOG.md` が scaffold / stale なら、現在の repo 用に更新する
+5. small なら fast path として `docs/PROJECT_BRIEF.md` と更新済み `docs/REQS.md` だけ読む
+6. medium なら `docs/INDEX.md` を追加する
+7. deep または handoff 再開なら `docs/AGENT_BOOTSTRAP.md` の deep path に従う
+8. 複雑作業なら `docs/EXECPLAN_*.md` を作る
+9. 既存コードと docs を必要最小限で確認してから変更する
+10. WSL から Windows 側 PowerShell / Codex を使う必要があれば、`scripts/win_pwsh.sh` と `scripts/win_codex.sh` を優先する
+11. Windows ネイティブ側から WSL コマンドが必要なら、`scripts/wsl_exec.ps1` または `scripts/wsl_exec.cmd` を優先する
+12. 途中で止まっても別エージェントが再開できるよう、docs を handoff-ready に保つ
+13. Gemini CLI なら、文脈が重いときは `context-audit` や `/stats` を使う
+
+出力方針:
+- 回答・説明・要約は原則日本語
+- 結論 -> 理由 -> 手順
+- 仮定は明記
+- 途中経過の逐次報告は避け、必要な報告はチェックポイントだけにする
+- 小タスクで docs を読み過ぎない
+- 検証コマンドと結果を添える
+
+安全方針:
+- secrets や `.env` 実体は触らない
+- 破壊的コマンドは使わない
+- 関係ない既存変更は巻き戻さない
