@@ -1,0 +1,115 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "skills": {
+    "paths": [
+      ".agents/skills"
+    ]
+  },
+  "permission": {
+    "read": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "*.env.sample": "allow",
+      "*.env.template": "allow",
+      ".env.example": "allow",
+      ".env.sample": "allow",
+      ".env.template": "allow",
+      "*id_rsa*": "deny",
+      "*aws/credentials*": "deny",
+      "*.pem": "deny",
+      "*.p12": "deny",
+      "*.key": "deny"
+    },
+    "edit": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "*.env.sample": "allow",
+      "*.env.template": "allow",
+      ".env.example": "allow",
+      ".env.sample": "allow",
+      ".env.template": "allow",
+      "*id_rsa*": "deny",
+      "*aws/credentials*": "deny",
+      "*.pem": "deny",
+      "*.p12": "deny",
+      "*.key": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "rm -rf /": "deny",
+      "rm -rf *": "deny",
+      "sudo *": "ask",
+      "sudo rm -rf*": "deny",
+      "doas *": "ask",
+      "pkexec *": "ask",
+      "runas *": "ask",
+      "*Start-Process*RunAs*": "ask",
+      "git reset --hard*": "deny",
+      "git clean -fd*": "deny",
+      "git push*": "ask",
+      "mkfs*": "deny",
+      "dd if=*": "deny",
+      "curl *": "ask",
+      "wget *": "ask",
+      "git clone*": "ask",
+      "gh repo clone*": "ask"
+    },
+    "skill": {
+      "*": "allow"
+    },
+    "external_directory": {
+      "*": "ask"
+    },
+    "doom_loop": "ask"
+  },
+  "agent": {
+    "docs-maintainer": {
+      "description": "docs、plans、work logs を更新し、repo を再開可能な状態に保つ。",
+      "mode": "subagent",
+      "permission": {
+        "read": "allow",
+        "edit": {
+          "*.md": "allow",
+          "docs/**/*.md": "allow",
+          "*": "deny"
+        },
+        "bash": "deny"
+      }
+    },
+    "repo-reviewer": {
+      "description": "変更コードをレビューし、バグ、退行、検証漏れ、危険な仮定を見つける。",
+      "mode": "subagent",
+      "permission": {
+        "read": "allow",
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "git diff*": "allow",
+          "git status*": "allow",
+          "rg *": "allow"
+        }
+      }
+    },
+    "test-investigator": {
+      "description": "失敗したテストや検証コマンドを調査し、最小で妥当な根本原因を特定する。",
+      "mode": "subagent",
+      "permission": {
+        "read": "allow",
+        "edit": "ask",
+        "bash": "ask"
+      }
+    }
+  }
+}

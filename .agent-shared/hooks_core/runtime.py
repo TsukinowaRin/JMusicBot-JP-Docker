@@ -25,8 +25,23 @@ def emit_codex_deny(reason: str) -> int:
     return 0
 
 
-def emit_gemini_deny(reason: str) -> int:
+def emit_antigravity_deny(reason: str) -> int:
     json.dump({"decision": "deny", "reason": reason}, sys.stdout)
+    return 0
+
+
+def emit_cursor_deny(reason: str) -> int:
+    # Cursor hooks は exit code 2 でもブロックできるが、JSON の permission deny は
+    # user / agent 両方へ理由を渡せるため、他 CLI adapter と同じ「理由つき deny」に
+    # そろえる。schema は cursor.com/docs/agent/hooks の documented 形式。
+    json.dump(
+        {
+            "permission": "deny",
+            "userMessage": reason,
+            "agentMessage": reason,
+        },
+        sys.stdout,
+    )
     return 0
 
 
@@ -43,15 +58,8 @@ def emit_codex_session_context(context: str) -> int:
     return 0
 
 
-def emit_gemini_session_context(context: str) -> int:
-    json.dump(
-        {
-            "hookSpecificOutput": {
-                "additionalContext": context,
-            }
-        },
-        sys.stdout,
-    )
+def emit_antigravity_pre_invocation_context(context: str) -> int:
+    json.dump({"injectSteps": [{"ephemeralMessage": context}]}, sys.stdout)
     return 0
 
 

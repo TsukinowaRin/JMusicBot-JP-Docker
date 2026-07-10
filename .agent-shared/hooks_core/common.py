@@ -15,6 +15,14 @@ DANGEROUS_COMMAND_PATTERNS = [
     r"\bdd\s+if=",
 ]
 
+ADMIN_ESCALATION_PATTERNS = [
+    r"\bsudo\b",
+    r"\bdoas\b",
+    r"\bpkexec\b",
+    r"\brunas\b",
+    r"\bstart-process\b[\s\S]*\b-verb\s+runas\b",
+]
+
 SECRET_FILE_BASENAMES = {
     ".env",
     ".env.local",
@@ -38,8 +46,10 @@ SECRET_PATH_PATTERNS = [
 SECRET_SUFFIXES = (".pem", ".p12", ".key")
 ALLOWED_SECRET_EXAMPLES = (".env.example", ".env.sample", ".env.template")
 
-SHELL_TOOL_NAMES = {"Bash", "run_shell_command"}
-WRITE_TOOL_NAMES = {"Edit", "Write", "write_file", "replace"}
+SHELL_TOOL_NAMES = {"Bash", "run_shell_command", "run_command"}
+APPLY_PATCH_TOOL_NAMES = {"apply_patch"}
+READ_TOOL_NAMES = {"Read", "view_file"}
+WRITE_TOOL_NAMES = {"Edit", "Write", "write_file", "replace", "write_to_file", "replace_file_content", "multi_replace_file_content"}
 SKILL_DIRECTORY_HINTS = (".agents/skills", ".claude/skills")
 SKILL_DOWNLOAD_PATTERNS = [
     r"\bcurl\b",
@@ -48,18 +58,26 @@ SKILL_DOWNLOAD_PATTERNS = [
     r"\bgh\s+repo\s+clone\b",
 ]
 
+ADMIN_APPROVAL_PATTERNS = [
+    r"(^|\s)AGENT_ADMIN_APPROVED=1(\s|$)",
+    r"\$env:AGENT_ADMIN_APPROVED\s*=\s*['\"]?1['\"]?",
+]
+
 
 def session_start_context() -> str:
+    # AGENTS.md は always-on で読まれる前提なので、ここには「session の入口で
+    # 迷いやすい順序」だけを短く注入する。長い運用ルールは docs/HARNESS.md と
+    # skills に置き、この文面と重複させない。
     return (
-        "初回 bootstrap では AGENTS.md と docs/AGENT_BOOTSTRAP.md を起点に、現在の user request と task に関係する project artifact を一次情報として扱い、docs/REQS.md を先に更新してから進めてください。"
-        "docs/PROJECT_BRIEF.md や docs/WORKLOG.md が scaffold / stale なら、現在の repo 用に更新してから使ってください。"
-        "小タスクは fast path として docs/PROJECT_BRIEF.md と更新済み docs/REQS.md だけ先に確認してください。"
-        "再開時、高リスク、複雑変更では docs/INDEX.md、docs/WORKLOG.md、docs/HANDOFF_PROTOCOL.md を追加で確認してください。"
-        "複雑な作業や複数モジュール横断の作業だけ docs/EXECPLAN_*.md を使ってください。"
-        "繰り返し使う repo 固有 workflow が不足しているときは、ダウンロードより `.agents/skills/local-skill-bootstrap/` を使った local skill 作成を優先してください。"
-        "WSL から Windows 側ツールを使うときは scripts/win_pwsh.sh と scripts/win_codex.sh を優先し、win_pwsh.sh は direct 優先で ssh は必要時だけ使ってください。"
-        "Windows ネイティブから WSL コマンドを使うときは scripts/wsl_exec.cmd または scripts/wsl_exec.ps1 を使ってください。"
-        "繰り返し手順は repo の skill / command を優先し、同じ長文を毎回書き直さないでください。"
+        "タスク開始時は start-task skill の手順で文脈を絞ってください: docs/REQS.md を現在の依頼で先に更新し、"
+        "小タスクは AGENTS.md と docs/PROJECT_BRIEF.md と更新済み docs/REQS.md だけで始めてください。"
+        "handoff 再開、高リスク、複雑変更では docs/WORKLOG.md と active な docs/EXECPLAN_*.md を追加で確認し、"
+        "複雑作業だけ execplan skill で docs/EXECPLAN_*.md を作ってください。"
+        "作業の区切りでは checkpoint skill で検証・docs 同期・停止点記録をまとめてください。"
+        "ハーネス構成（CLI 差分、skills、hooks、wrapper）の正本は docs/HARNESS.md です。"
+        "skill の編集元は .agents/skills/ のみで、足りない workflow はダウンロードより local-skill-bootstrap で作ってください。"
+        "WSL から Windows 側ツールは scripts/win_pwsh.sh / scripts/win_codex.sh、Windows から WSL は scripts/wsl_exec.cmd / scripts/wsl_exec.ps1 を使ってください。"
+        "sudo / UAC / RunAs などの管理者権限は、各回のユーザー明示許可後に AGENT_ADMIN_APPROVED=1 を付けた1コマンドだけ許可してください。"
         "回答と説明は原則日本語、途中経過は checkpoint のみ、.env や secrets には触れず、終了前に変更範囲を検証してください。"
     )
 
@@ -70,7 +88,7 @@ def _is_allowed_secret_example(value: str) -> bool:
 
 
 def _extract_command(tool_input: dict) -> str:
-    return str(tool_input.get("command") or tool_input.get("cmd") or "")
+    return str(tool_input.get("command") or tool_input.get("cmd") or tool_input.get("CommandLine") or "")
 
 
 def _extract_path(tool_input: dict) -> str:
@@ -79,11 +97,19 @@ def _extract_path(tool_input: dict) -> str:
         tool_input.get("path"),
         tool_input.get("target_file"),
         tool_input.get("target"),
+        tool_input.get("AbsolutePath"),
+        tool_input.get("TargetFile"),
+        tool_input.get("DirectoryPath"),
+        tool_input.get("SearchPath"),
     ]
     for candidate in candidates:
         if candidate:
             return str(candidate)
     return ""
+
+
+def _has_admin_approval_marker(command: str) -> bool:
+    return any(re.search(pattern, command, flags=re.IGNORECASE) for pattern in ADMIN_APPROVAL_PATTERNS)
 
 
 def _command_violation(command: str) -> str | None:
@@ -92,6 +118,14 @@ def _command_violation(command: str) -> str | None:
     for pattern in DANGEROUS_COMMAND_PATTERNS:
         if re.search(pattern, lowered):
             return "破壊的な shell コマンドはデフォルトで禁止です。必要ならユーザー確認を取ってください。"
+
+    for pattern in ADMIN_ESCALATION_PATTERNS:
+        if re.search(pattern, lowered) and not _has_admin_approval_marker(command):
+            return (
+                "管理者権限の使用は毎回ユーザーの明示許可が必要です。"
+                "目的、変更対象、rollback / recovery、失敗判定、検証方法を説明し、"
+                "ユーザーが直前に OK した場合だけ AGENT_ADMIN_APPROVED=1 を付けて再実行してください。"
+            )
 
     if any(skill_dir in lowered for skill_dir in SKILL_DIRECTORY_HINTS):
         for pattern in SKILL_DOWNLOAD_PATTERNS:
@@ -106,7 +140,7 @@ def _command_violation(command: str) -> str | None:
     return None
 
 
-def _path_violation(path_value: str) -> str | None:
+def _path_violation(path_value: str, action: str = "編集") -> str | None:
     if not path_value:
         return None
 
@@ -116,7 +150,21 @@ def _path_violation(path_value: str) -> str | None:
 
     basename = pathlib.Path(path_value).name
     if basename in SECRET_FILE_BASENAMES or basename.endswith(SECRET_SUFFIXES):
-        return "secret の可能性が高いファイルの編集を禁止しました。example / sample だけを扱ってください。"
+        return f"secret の可能性が高いファイルの{action}を禁止しました。example / sample だけを扱ってください。"
+
+    return None
+
+
+def _patch_violation(patch_value: str) -> str | None:
+    for line in patch_value.splitlines():
+        if line.startswith(("*** Add File: ", "*** Update File: ", "*** Delete File: ")):
+            reason = _path_violation(line.split(": ", 1)[1])
+            if reason:
+                return reason
+        if line.startswith("*** Move to: "):
+            reason = _path_violation(line.split(": ", 1)[1])
+            if reason:
+                return reason
 
     return None
 
@@ -124,6 +172,12 @@ def _path_violation(path_value: str) -> str | None:
 def evaluate_tool_use(tool_name: str, tool_input: dict) -> str | None:
     if tool_name in SHELL_TOOL_NAMES:
         return _command_violation(_extract_command(tool_input))
+
+    if tool_name in APPLY_PATCH_TOOL_NAMES:
+        return _patch_violation(_extract_command(tool_input))
+
+    if tool_name in READ_TOOL_NAMES:
+        return _path_violation(_extract_path(tool_input), "読み取り")
 
     if tool_name in WRITE_TOOL_NAMES:
         return _path_violation(_extract_path(tool_input))

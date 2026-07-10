@@ -13,3 +13,5 @@
 *.bat  text eol=crlf
 *.cmd  text eol=crlf
 *.ps1  text eol=crlf
+
+# Harness v2 additions (20260710_231922)

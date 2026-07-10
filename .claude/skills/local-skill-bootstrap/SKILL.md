@@ -1,58 +1,57 @@
 ---
 name: local-skill-bootstrap
-description: Create or update a repo-local shared skill when the user asks for a new reusable workflow, or when repeated repo-specific instructions should become a local skill instead of ad-hoc prompting or downloading a third-party skill.
+description: 再利用可能な workflow を新しく頼まれたとき、または繰り返し出てくる repo 固有の指示を ad-hoc な prompt や第三者 skill の download ではなく repo-local な skill にすべきとき、`.agents/skills/` 配下の shared skill を新規作成または更新する。
 ---
 
 # Local Skill Bootstrap
 
-Use this skill when a repeatable workflow should become a repo-local skill under `.agents/skills/`.
+繰り返し使う workflow を `.agents/skills/` 配下の repo-local skill にするときに使う。
 
-Do not use this for:
-- one-off task notes that belong in `docs/REQS.md`
-- downloading or installing third-party skills from the internet
-- tiny single-use prompts that do not justify a reusable workflow
+次の用途には使わない:
 
-## Workflow
+- `docs/REQS.md` に書けば足りる単発のタスクメモ
+- インターネットからの第三者 skill の download / install
+- 再利用 workflow にする価値のない小さな単発 prompt
 
-1. Check whether an existing skill already covers the need.
-2. Choose a hyphen-case skill name and a precise trigger description.
-3. Run `scripts/init_skill.py` in this skill directory to scaffold the new shared skill.
-4. Edit the generated `SKILL.md` and any optional `scripts/`, `references/`, or `assets/`.
-5. Run `python3 scripts/sync_shared_skills_to_claude.py` so `.claude/skills/` stays in sync.
-6. If the new skill changes repo workflow, update the minimum relevant docs.
+## 手順
 
-## Commands
+1. 既存 skill で足りないかを先に確認する。
+2. hyphen-case の skill 名と、発動条件が正確に伝わる description を決める。
+3. この skill の `scripts/init_skill.py` で新しい shared skill を scaffold する。
+4. 生成された `SKILL.md` と、必要なら `scripts/` / `references/` / `assets/` を編集する。
+5. `python3 scripts/sync_shared_skills.py` を実行して `.claude/skills/` を同期する。
+6. 新 skill が repo の workflow を変えるなら、関連する最小限の docs を更新する。
 
-Create a minimal skill:
+## コマンド
+
+最小構成の skill を作る:
 
 ```bash
 python3 .agents/skills/local-skill-bootstrap/scripts/init_skill.py \
   --name my-skill \
-  --description "Explain exactly when this skill should trigger."
+  --description "この skill がいつ発動すべきかを正確に書く。"
 ```
 
-Create a skill with bundled folders:
+同梱フォルダ付きの skill を作る:
 
 ```bash
 python3 .agents/skills/local-skill-bootstrap/scripts/init_skill.py \
   --name my-skill \
-  --description "Explain exactly when this skill should trigger." \
+  --description "この skill がいつ発動すべきかを正確に書く。" \
   --with-scripts \
   --with-references
 ```
 
-## Authoring Rules
+## 作成ルール
 
-- Keep `SKILL.md` concise and explicit about when to use and not use the skill.
-- Put reusable code in `scripts/` only when determinism or repetition justifies it.
-- Put detailed reference material in `references/` instead of bloating `SKILL.md`.
-- Do not create extra README or changelog files inside the skill.
-- Prefer updating an existing skill over creating a near-duplicate.
+- `SKILL.md` は簡潔に保ち、使う場面と使わない場面を明示する。
+- 再利用コードを `scripts/` に置くのは、決定性や繰り返しがそれを正当化するときだけ。
+- 詳細な参照資料は `SKILL.md` を肥大化させず `references/` に置く。
+- skill 内に余計な README や changelog を作らない。
+- ほぼ重複した新 skill を作るより、既存 skill の更新を優先する。
 
-## Validation
+## 検証
 
 - `find .agents/skills/<skill-name> -maxdepth 3 -type f | sort`
 - `find .claude/skills/<skill-name> -maxdepth 3 -type f | sort`
-- `python3 scripts/sync_shared_skills_to_claude.py`
-
-For Gemini CLI, reload if needed with `/skills reload`.
+- `python3 scripts/sync_shared_skills.py`

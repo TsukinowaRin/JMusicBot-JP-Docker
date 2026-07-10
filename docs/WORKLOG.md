@@ -1,3 +1,23 @@
+# Worklog
+
+This file records restartable checkpoints for the current repository.
+
+## Current State
+
+- Harness migration timestamp: `20260710_231922`
+- Source template: `/mnt/d/Git_WorkSpace/01.Universal-agent-template-20260707`
+- Legacy harness docs are preserved under `docs/legacy/20260710_harness_v1/` when present.
+- Migration backup is stored outside this repo under `/mnt/d/Git_WorkSpace/_harness_migration_20260710/backup/JMusicBot-JP-Docker/20260710_231922`.
+
+## Migration Entry
+
+- Applied Universal Agent Harness v2 at the repository surface.
+- Preserved project README when present.
+- Preserved previous `REQS.md`, `WORKLOG.md`, and `PROJECT_BRIEF.md` content inside the rewritten latest-format docs.
+- Pre-push status: Pre-migration checkpoint commit exists locally, but push failed: remote `develop` is ahead and rebase conflicted; repo is ahead 1 and behind 17 after aborting the failed rebase.
+
+## Preserved Pre-Migration WORKLOG
+
 # 作業ログ
 
 このファイルは current task の停止点と次の一手だけを残す。

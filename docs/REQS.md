@@ -1,3 +1,24 @@
+# Requirements
+
+This file is the current-task source of truth for this repository.
+
+## Current Request
+
+- Universal Agent Harness v2 has been migrated into this repository surface.
+- Existing progress and requirements from before the migration are preserved below.
+
+## Migration Constraints
+
+- Do not reset project progress to template scaffold.
+- Use `docs/HARNESS.md` as the harness source of truth.
+- Keep future task requirements in this file.
+
+## Pre-Push Status
+
+Pre-migration checkpoint commit exists locally, but push failed: remote `develop` is ahead and rebase conflicted; repo is ahead 1 and behind 17 after aborting the failed rebase.
+
+## Preserved Pre-Migration REQS
+
 # 要件
 
 このファイルは current task の source of truth。初回 bootstrap や handoff では、まずこの内容を現在の依頼で上書きしてから使う。

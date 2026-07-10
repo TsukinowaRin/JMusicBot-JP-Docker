@@ -4,3 +4,12 @@ __pycache__/
 CLAUDE.local.md
 .claude/settings.local.json
 .gemini/tmp/
+
+# Harness v2 additions (20260710_231922)
+# 旧世代ハーネスの参照コピー。テンプレート配布物には含めない
+Old/
+.antigravitycli/
+.obsidian/
+tmp/
+# agent_loop.py の実行ログ（runtime 生成物。state は docs/ 側に置く）
+.loop/

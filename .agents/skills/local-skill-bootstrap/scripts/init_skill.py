@@ -69,7 +69,7 @@ def _write_if_missing(path: pathlib.Path, content: str, force: bool) -> None:
 
 
 def _sync_claude_skills(repo_root: pathlib.Path) -> None:
-    sync_script = repo_root / "scripts" / "sync_shared_skills_to_claude.py"
+    sync_script = repo_root / "scripts" / "sync_shared_skills.py"
     if not sync_script.exists():
         return
     subprocess.run([sys.executable, str(sync_script)], cwd=repo_root, check=True)

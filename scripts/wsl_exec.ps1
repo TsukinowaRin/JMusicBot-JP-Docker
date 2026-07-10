@@ -93,23 +93,24 @@ $bashCommand = if ($ShellCommand) {
   ($CommandArgs | ForEach-Object { Convert-ToBashSingleQuoted -Value $_ }) -join " "
 }
 
-$invoke = "wsl.exe"
+$wslArgs = @()
 if ($effectiveDistro) {
-  $invoke += " -d " + (Convert-ToPwshSingleQuoted -Value $effectiveDistro)
+  $wslArgs += @("-d", $effectiveDistro)
 }
 
 if ($wslPath) {
-  $invoke += " --cd " + (Convert-ToPwshSingleQuoted -Value $wslPath)
+  $wslArgs += @("--cd", $wslPath)
 }
 
-$invoke += " bash -lc " + (Convert-ToPwshSingleQuoted -Value $bashCommand)
+$wslArgs += @("bash", "-lc", $bashCommand)
+$displayInvoke = "wsl.exe " + (($wslArgs | ForEach-Object { Convert-ToPwshSingleQuoted -Value $_ }) -join " ")
 
 if ($debugEnabled) {
-  Write-Host "[wsl_exec] $invoke" -ForegroundColor Yellow
+  Write-Host "[wsl_exec] $displayInvoke" -ForegroundColor Yellow
 }
-Write-TraceLine ("invoke=" + $invoke)
+Write-TraceLine ("invoke=" + $displayInvoke)
 
-Invoke-Expression $invoke
+& wsl.exe @wslArgs
 $exitCode = 0
 if (Test-Path variable:LASTEXITCODE) {
   $exitCode = [int]$LASTEXITCODE
