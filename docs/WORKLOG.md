@@ -180,3 +180,14 @@ This file records restartable checkpoints for the current repository.
   - `docs/INDEX.md`
   - `docs/PROJECT_BRIEF.md`
   - `README.md`
+
+## Harness Migration Verification 20260710_235706
+
+- Local smoke after cleanup: pass (smoke OK)
+- Initial smoke before cleanup: fail
+- Independent Codex check: not completed: Codex CLI usage limit was reached during the serial check run; CLI reported retry after Jul 11, 2026 3:33 AM.
+- Git publish status from migration run: blocked
+- Notes:
+  - v1 harness references in README / PROJECT_BRIEF were rewritten to v2 names where found.
+  - Pre-migration PROJECT_BRIEF details were moved to `docs/legacy/20260710_harness_v1/` when they had been embedded inline.
+  - Old `scripts/sync_shared_skills_to_claude.py` was removed when present; the v2 script is `scripts/sync_shared_skills.py`.
