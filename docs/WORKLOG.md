@@ -191,3 +191,13 @@ This file records restartable checkpoints for the current repository.
   - v1 harness references in README / PROJECT_BRIEF were rewritten to v2 names where found.
   - Pre-migration PROJECT_BRIEF details were moved to `docs/legacy/20260710_harness_v1/` when they had been embedded inline.
   - Old `scripts/sync_shared_skills_to_claude.py` was removed when present; the v2 script is `scripts/sync_shared_skills.py`.
+
+## Independent Codex Check Retry 20260711_111343
+
+- Result: pass
+- Output: `/mnt/d/Git_WorkSpace/_harness_migration_20260710/logs/codex_checks_retry/JMusicBot-JP-Docker_20260711_105510.txt`
+- Scope: read-only check of `AGENTS.md`, `docs/HARNESS.md`, `docs/PROJECT_BRIEF.md`, `docs/REQS.md`, and `docs/WORKLOG.md`.
+- Notes:
+  - This replaces the previous `blocked by Codex CLI usage limit` status from 2026-07-10.
+  - No files were modified by the independent Codex check itself.
+
