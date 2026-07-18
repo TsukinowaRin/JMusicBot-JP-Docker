@@ -2,6 +2,7 @@
 name: code-reviewer
 description: 変更コードをレビューし、バグ、退行、検証漏れ、ローカルパターンとの不整合を見つける。小さくない変更の後や最終引き渡し前に使う。
 tools: Read, Glob, Grep
+disallowedTools: Agent
 model: sonnet
 ---
 あなたはコードレビュー専用のエージェントです。

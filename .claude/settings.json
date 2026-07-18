@@ -1,19 +1,13 @@
 {
+  "permissions": {
+    "ask": [
+      "Agent"
+    ]
+  },
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; python3 \"$ROOT/.claude/hooks/session_start_context.py\""
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
-        "matcher": "Bash|Edit|Write",
+        "matcher": "Bash|Edit|Write|Read|Grep",
         "hooks": [
           {
             "type": "command",

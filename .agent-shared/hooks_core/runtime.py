@@ -25,6 +25,14 @@ def emit_codex_deny(reason: str) -> int:
     return 0
 
 
+def emit_grok_deny(reason: str) -> int:
+    # Grok project hooks use camelCase input and a small decision schema. Exit 2
+    # is intentional: Grok accepts the JSON reason and treats the hook as a
+    # blocking decision even if a future build stops parsing stdout.
+    json.dump({"decision": "deny", "reason": reason}, sys.stdout)
+    return 2
+
+
 def emit_antigravity_deny(reason: str) -> int:
     json.dump({"decision": "deny", "reason": reason}, sys.stdout)
     return 0
@@ -42,27 +50,4 @@ def emit_cursor_deny(reason: str) -> int:
         },
         sys.stdout,
     )
-    return 0
-
-
-def emit_codex_session_context(context: str) -> int:
-    json.dump(
-        {
-            "hookSpecificOutput": {
-                "hookEventName": "SessionStart",
-                "additionalContext": context,
-            }
-        },
-        sys.stdout,
-    )
-    return 0
-
-
-def emit_antigravity_pre_invocation_context(context: str) -> int:
-    json.dump({"injectSteps": [{"ephemeralMessage": context}]}, sys.stdout)
-    return 0
-
-
-def emit_claude_text_context(context: str) -> int:
-    sys.stdout.write(context)
     return 0

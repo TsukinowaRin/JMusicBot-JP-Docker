@@ -46,10 +46,20 @@ SECRET_PATH_PATTERNS = [
 SECRET_SUFFIXES = (".pem", ".p12", ".key")
 ALLOWED_SECRET_EXAMPLES = (".env.example", ".env.sample", ".env.template")
 
-SHELL_TOOL_NAMES = {"Bash", "run_shell_command", "run_command"}
+SHELL_TOOL_NAMES = {"Bash", "run_shell_command", "run_command", "run_terminal_command"}
 APPLY_PATCH_TOOL_NAMES = {"apply_patch"}
-READ_TOOL_NAMES = {"Read", "view_file"}
-WRITE_TOOL_NAMES = {"Edit", "Write", "write_file", "replace", "write_to_file", "replace_file_content", "multi_replace_file_content"}
+READ_TOOL_NAMES = {"Read", "view_file", "read_file", "hashline_read", "grep", "hashline_grep"}
+WRITE_TOOL_NAMES = {
+    "Edit",
+    "Write",
+    "write_file",
+    "replace",
+    "write_to_file",
+    "replace_file_content",
+    "multi_replace_file_content",
+    "search_replace",
+    "hashline_edit",
+}
 SKILL_DIRECTORY_HINTS = (".agents/skills", ".claude/skills")
 SKILL_DOWNLOAD_PATTERNS = [
     r"\bcurl\b",
@@ -62,24 +72,6 @@ ADMIN_APPROVAL_PATTERNS = [
     r"(^|\s)AGENT_ADMIN_APPROVED=1(\s|$)",
     r"\$env:AGENT_ADMIN_APPROVED\s*=\s*['\"]?1['\"]?",
 ]
-
-
-def session_start_context() -> str:
-    # AGENTS.md は always-on で読まれる前提なので、ここには「session の入口で
-    # 迷いやすい順序」だけを短く注入する。長い運用ルールは docs/HARNESS.md と
-    # skills に置き、この文面と重複させない。
-    return (
-        "タスク開始時は start-task skill の手順で文脈を絞ってください: docs/REQS.md を現在の依頼で先に更新し、"
-        "小タスクは AGENTS.md と docs/PROJECT_BRIEF.md と更新済み docs/REQS.md だけで始めてください。"
-        "handoff 再開、高リスク、複雑変更では docs/WORKLOG.md と active な docs/EXECPLAN_*.md を追加で確認し、"
-        "複雑作業だけ execplan skill で docs/EXECPLAN_*.md を作ってください。"
-        "作業の区切りでは checkpoint skill で検証・docs 同期・停止点記録をまとめてください。"
-        "ハーネス構成（CLI 差分、skills、hooks、wrapper）の正本は docs/HARNESS.md です。"
-        "skill の編集元は .agents/skills/ のみで、足りない workflow はダウンロードより local-skill-bootstrap で作ってください。"
-        "WSL から Windows 側ツールは scripts/win_pwsh.sh / scripts/win_codex.sh、Windows から WSL は scripts/wsl_exec.cmd / scripts/wsl_exec.ps1 を使ってください。"
-        "sudo / UAC / RunAs などの管理者権限は、各回のユーザー明示許可後に AGENT_ADMIN_APPROVED=1 を付けた1コマンドだけ許可してください。"
-        "回答と説明は原則日本語、途中経過は checkpoint のみ、.env や secrets には触れず、終了前に変更範囲を検証してください。"
-    )
 
 
 def _is_allowed_secret_example(value: str) -> bool:

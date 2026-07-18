@@ -72,6 +72,7 @@
     "external_directory": {
       "*": "ask"
     },
+    "task": "ask",
     "doom_loop": "ask"
   },
   "agent": {

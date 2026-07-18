@@ -4,9 +4,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# A validation run must not leave Python cache files in a freshly extracted
+# template. Exporting the flag also covers adapter subprocesses started below.
+export PYTHONDONTWRITEBYTECODE=1
+
 python3 - <<'PY'
 import pathlib
+import json
+import subprocess
 import sys
+import tomllib
 
 sys.path.insert(0, str(pathlib.Path(".agent-shared").resolve()))
 from hooks_core import evaluate_tool_use
@@ -41,6 +48,66 @@ expect_block(
     "skill directory",
 )
 expect_allow("safe git", "Bash", {"command": "git status --short"})
+expect_block("grok destructive git", "run_terminal_command", {"command": "git reset --hard HEAD"}, "破壊的")
+expect_block("grok secret read", "read_file", {"path": ".env.production"}, "secret")
+expect_block("grok secret grep", "grep", {"SearchPath": ".env.production"}, "secret")
+expect_block("grok secret edit", "search_replace", {"path": "id_rsa"}, "secret")
+
+config = tomllib.loads(pathlib.Path(".grok/config.toml").read_text(encoding="utf-8"))
+permission = config.get("permission", {})
+deny = permission.get("deny", [])
+ask = permission.get("ask", [])
+for required in (
+    "Read(.env)",
+    "Grep(.env)",
+    "Edit(.env)",
+    "Bash(*git reset --hard*)",
+    "Bash(*git clean -fd*)",
+    "Bash(*rm -rf /*)",
+    "Bash(rm -rf *)",
+    "Bash(*.env*)",
+):
+    if required not in deny:
+        raise SystemExit(f"grok config: missing deny rule {required!r}")
+for required in ("Bash(sudo *)", "Bash(git push*)", "Bash(curl *)"):
+    if required not in ask:
+        raise SystemExit(f"grok config: missing ask rule {required!r}")
+
+
+def run_claude_adapter(payload):
+    return subprocess.run(
+        [sys.executable, ".claude/hooks/pre_tool_use_policy.py"],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+grok = run_claude_adapter(
+    {"toolName": "run_terminal_command", "toolInput": {"command": "git reset --hard HEAD"}}
+)
+if grok.returncode != 2:
+    raise SystemExit(f"grok adapter: expected exit 2, got {grok.returncode}: {grok.stdout}{grok.stderr}")
+grok_output = json.loads(grok.stdout)
+if grok_output.get("decision") != "deny" or "破壊的" not in grok_output.get("reason", ""):
+    raise SystemExit(f"grok adapter: invalid deny output {grok_output!r}")
+
+claude = run_claude_adapter(
+    {"tool_name": "Bash", "tool_input": {"command": "git reset --hard HEAD"}}
+)
+if claude.returncode != 0:
+    raise SystemExit(f"claude adapter: expected exit 0, got {claude.returncode}")
+claude_output = json.loads(claude.stdout)
+decision = claude_output.get("hookSpecificOutput", {}).get("permissionDecision")
+if decision != "deny":
+    raise SystemExit(f"claude adapter: invalid deny output {claude_output!r}")
+
+safe = run_claude_adapter(
+    {"toolName": "run_terminal_command", "toolInput": {"command": "git status --short"}}
+)
+if safe.returncode != 0 or safe.stdout:
+    raise SystemExit(f"grok adapter: safe command must pass silently: {safe.returncode} {safe.stdout!r}")
 
 print("Security smoke OK")
 PY

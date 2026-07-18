@@ -2,6 +2,8 @@
 description: docs、plans、work logs を更新し、repo を再開可能で自己記述的な状態に保つ。
 mode: subagent
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit:
     "*.md": allow

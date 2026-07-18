@@ -1,17 +1,8 @@
 {
-  "workspace-context": {
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; python3 \"$ROOT/.agents/hooks/pre_invocation_context.py\"",
-        "timeout": 30
-      }
-    ]
-  },
   "safety-policy": {
     "PreToolUse": [
       {
-        "matcher": "run_command|view_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "matcher": "run_command|view_file|write_to_file|replace_file_content|multi_replace_file_content|invoke_subagent|define_subagent",
         "hooks": [
           {
             "type": "command",

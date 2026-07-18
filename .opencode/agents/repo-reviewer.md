@@ -1,7 +1,9 @@
 ---
 description: 変更コードをレビューし、バグ、退行、検証漏れ、危険な仮定を見つける。
-mode: subagent
+mode: all
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit: deny
   bash:

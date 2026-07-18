@@ -2,6 +2,8 @@
 description: 失敗したテストや検証コマンドを調査し、最小で妥当な根本原因を特定する。
 mode: subagent
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit: ask
   bash: ask

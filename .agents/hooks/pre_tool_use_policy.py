@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import os
 import pathlib
 import sys
 
@@ -17,6 +19,19 @@ def main() -> int:
 
     payload = load_payload()
     tool_call = payload.get("toolCall", {})
+    if tool_call.get("name") in {"invoke_subagent", "define_subagent"}:
+        # Antigravityにはsubagent無効化flagがない。対話時は毎回確認し、runnerが
+        # HARNESS_UNATTENDEDを付けた無人実行では確認待ちにせずfail-closedで拒否する。
+        unattended = os.environ.get("HARNESS_UNATTENDED") == "1"
+        print(json.dumps({
+            "decision": "deny" if unattended else "force_ask",
+            "reason": (
+                "unattended harnessではsubagent再委任を禁止しています"
+                if unattended
+                else "subagent起動は使用量を増やすため、人間の明示承認が必要です"
+            ),
+        }, ensure_ascii=False))
+        return 0
     reason = evaluate_tool_use(tool_call.get("name", ""), tool_call.get("args", {}))
     if reason:
         return emit_antigravity_deny(reason)

@@ -13,11 +13,16 @@ def _load_shared_module() -> None:
 
 def main() -> int:
     _load_shared_module()
-    from hooks_core import emit_codex_deny, evaluate_tool_use, load_payload
+    from hooks_core import emit_codex_deny, emit_grok_deny, evaluate_tool_use, load_payload
 
     payload = load_payload()
-    reason = evaluate_tool_use(payload.get("tool_name", ""), payload.get("tool_input", {}))
+    is_grok = "toolName" in payload or "toolInput" in payload
+    tool_name = payload.get("tool_name") or payload.get("toolName") or ""
+    tool_input = payload.get("tool_input") or payload.get("toolInput") or {}
+    reason = evaluate_tool_use(tool_name, tool_input)
     if reason:
+        if is_grok:
+            return emit_grok_deny(reason)
         return emit_codex_deny(reason)
 
     return 0

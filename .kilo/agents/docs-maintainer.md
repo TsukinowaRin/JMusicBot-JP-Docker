@@ -3,6 +3,8 @@ description: docs、plans、work logs を更新し、repo を再開可能で自�
 mode: subagent
 color: "#2E7D32"
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit:
     "*.md": allow

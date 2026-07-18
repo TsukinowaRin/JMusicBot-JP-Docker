@@ -3,6 +3,8 @@ description: 失敗したテストや検証コマンドを調査し、最小で�
 mode: subagent
 color: "#EF6C00"
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit: ask
   bash: ask

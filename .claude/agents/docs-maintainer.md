@@ -2,6 +2,7 @@
 name: docs-maintainer
 description: docs、plans、work logs を更新し、repo が再開可能で自己記述的な状態を保つ。挙動や運用が変わり、docs の整合が必要なときに使う。
 tools: Read, Glob, Grep, Edit, Write
+disallowedTools: Agent
 model: sonnet
 ---
 あなたはドキュメント保守専用のエージェントです。

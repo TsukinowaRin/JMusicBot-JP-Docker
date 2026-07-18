@@ -3,6 +3,8 @@ description: 変更コードをレビューし、バグ、退行、検証漏れ�
 mode: subagent
 color: "#1565C0"
 permission:
+  task: deny
+  doom_loop: deny
   read: allow
   edit: deny
   bash:
