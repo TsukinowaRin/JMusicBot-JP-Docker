@@ -12,7 +12,9 @@ UI コードを点検し、一通り良くなるまで反復改善する。
 
 注意: gates の `git diff --check` は最低限の placeholder。対象プロジェクトに
 lint / build / visual test があるなら、この profile をコピーして gates に追加してから回すこと
-（例: `npm run lint`、`npm run build`）。
+（例: `npm run lint`、`npm run build`）。gates が参照する設定・テストファイル
+（例: `.eslintrc`、visual test の snapshot）は frontmatter の `protect:` にも列挙し、
+「lint 設定を緩めて pass させる」型の改変を runner に検出させる。
 
 ## 進め方
 

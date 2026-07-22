@@ -6,6 +6,8 @@ gates_every_iteration: true
 gates:
   - bash scripts/security_smoke.sh
   - git diff --check
+protect:
+  - scripts/security_smoke.sh
 ---
 # セキュリティ反復レビュー
 

@@ -60,6 +60,16 @@ design read の後、内部的に設定する。
 - 実データ由来か sample data と明記されていない限り、精密に見せかけた数値を使わない。
 - ユーザー提供の brand copy でない限り、「Elevate」「Unleash」「Next-gen」「Seamless」のような埋め草 copy を避ける。
 
+## 既存 UI の De-slop
+
+killaislop.com の catalogue を調査観点として使う。ただし外部 scanner や skill は直接導入せず、project の意図と `DESIGN.md` を優先する。
+
+1. mass-edit の前に、対象 source を `rg` で狭く走査する。gradient text、glass / blur、過剰な radius と shadow、badge / pill、同型 card grid、section ごとの kicker、装飾 icon、架空の stat、均一 spacing、generic copy を候補にする。
+2. 各候補を code の前後まで読み、`slop` と `intentional` に分ける。brand token、logo、意図的な illustration、既存 design system の表現は残す。
+3. 変更前に、確定した候補を `file:line / 理由 / 最小修正` の形式でまとめる。範囲が複数 group に分かれる場合は、どこまで直すかユーザーが選べるようにする。
+4. shared token / component で直せるなら call site の一括編集より優先する。色を新設せず、既存 accent と neutral を使う。
+5. 修正後は同じ検索を再実行し、残した候補と理由を記録する。検索結果ゼロを visual quality の証明にせず、可能なら before / after を目視確認する。
+
 ## Typography
 
 - font は意図をもって選ぶ。premium / creative な仕事で Inter を既定にしない。
